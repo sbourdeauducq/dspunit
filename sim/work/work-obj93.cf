@@ -1,0 +1,10 @@
+v 3
+file "/home/stock/Mes_Donnees/Travaux actuels/refact/dspunit/sim/" "../rtl/dspalu_acc.vhd" "20111211153453.000" "20111211163456.336":
+  entity dspalu_acc at 22( 1409) + 0 on 138;
+  architecture archi_dspalu_acc of dspalu_acc at 51( 2693) + 0 on 139;
+file "/home/stock/Mes_Donnees/Travaux actuels/refact/dspunit/sim/" "../rtl/dspalu_pac.vhd" "20111211152521.000" "20111211163456.209":
+  package dspalu_pac at 22( 1409) + 0 on 134 body;
+  package body dspalu_pac at 39( 1963) + 0 on 135;
+file "/home/stock/Mes_Donnees/Travaux actuels/refact/dspunit/sim/" "bench_dspalu.vhd" "20111211151520.000" "20111211163456.257":
+  entity bench_dspalu at 3( 40) + 0 on 136;
+  architecture archi_bench_dspalu of bench_dspalu at 12( 336) + 0 on 137;
