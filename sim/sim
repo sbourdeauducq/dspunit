@@ -1,0 +1,10 @@
+#!/bin/sh
+case $1 in
+    build ) ghdl -m -Wl,-lm --ieee=synopsys --workdir=work bench_$2;;
+    clean ) rm work/*.o;;
+    run ) ghdl -r bench_$2 --stop-time=35000ns --vcd=waves.vcd 2> run.log;;
+    view ) gtkwave waves.vcd &;;
+    * ) echo "Invalid args!"
+    echo "sim build|clean|run|view ext(bench)";;
+esac
+
