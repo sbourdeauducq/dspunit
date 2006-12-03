@@ -86,6 +86,8 @@ architecture archi_dspalu_acc of dspalu_acc is
   signal s_mul_b2_in            : std_logic_vector((sig_width - 1) downto 0);
   type t_cmul_state is (cmul_step, cmul_end);
   signal s_cmul_state        : t_cmul_state;
+  signal s_result_sum        : signed((2*sig_width - 1) downto 0);
+  signal s_cmp_greater       : std_logic;
   signal s_b2                : std_logic_vector((sig_width - 1) downto 0);
 begin  -- archs_dspalu_acc
   -----------------------------------------------------------------------------
@@ -182,6 +184,16 @@ begin  -- archs_dspalu_acc
       end if;
     end if;
   end process p_alu_ctrl;
+--  -------------------------------------------------------------------------------
+--  -- Sum of products
+--  -------------------------------------------------------------------------------
+  p_sum_reg : process (clk)
+  begin -- process p_sum_reg
+    if rising_edge(clk) then  -- rising clock edge
+      s_result_sum <= s_result1 + s_result2;
+      --s_result_sum <= s_mul_out1 + s_mul_out2;
+    end if;
+  end process p_sum_reg;
 
   p_mul_reg : process (clk)
   begin -- process p_mul_reg
