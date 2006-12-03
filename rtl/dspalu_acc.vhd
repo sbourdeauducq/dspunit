@@ -66,6 +66,10 @@ architecture archi_dspalu_acc of dspalu_acc is
   signal s_mul_out2          : signed((2*sig_width - 1) downto 0);
   signal s_result_acc1      : signed((acc_width - 1) downto 0);
   signal s_result_acc2      : signed((acc_width - 1) downto 0);
+  signal s_back_acc1         : signed((acc_width - 1) downto 0);
+  signal s_back_acc2         : signed((acc_width - 1) downto 0);
+  signal s_cmp_reg           : signed((acc_width - 1) downto 0);
+  signal s_cmp_in           : signed((acc_width - 1) downto 0);
   signal s_acc_mode1         : t_acc_mode;
   signal s_acc_mode2         : t_acc_mode;
   signal s_acc_mode1_inreg   : t_acc_mode;
@@ -112,9 +116,17 @@ begin  -- archs_dspalu_acc
 	    s_result_acc1 <= s_result_acc1 + v_tmp_acc1;
 	  when acc_sub =>
 	    s_result_acc1 <= s_result_acc1 - v_tmp_acc1;
+	  when acc_back_add =>
+	    s_result_acc1 <= s_back_acc1 + v_tmp_acc1;
+	  when acc_minback_add =>
+	    s_result_acc1 <= v_tmp_acc1 - s_back_acc1;
+	  when acc_minback_sub =>
+	    s_result_acc1 <=  - v_tmp_acc1 - s_back_acc1;
 	  when others =>
 	    s_result_acc1 <= (others => '0');
 	end case;
+	-- backup of accumulator content
+	s_back_acc1 <= s_result_acc1;
       end if;
     end if;
   end process p_acc1;
@@ -141,9 +153,17 @@ begin  -- archs_dspalu_acc
 	    s_result_acc2 <= s_result_acc2 + v_tmp_acc2;
 	  when acc_sub =>
 	    s_result_acc2 <= s_result_acc2 - v_tmp_acc2;
+	  when acc_back_add =>
+	    s_result_acc2 <= s_back_acc2 + v_tmp_acc2;
+	  when acc_minback_add =>
+	    s_result_acc2 <= v_tmp_acc2 - s_back_acc2;
+	  when acc_minback_sub =>
+	    s_result_acc2 <=  - v_tmp_acc2 - s_back_acc2;
 	  when others =>
 	    s_result_acc2 <= (others => '0');
 	end case;
+	-- backup of accumulator content
+	s_back_acc2 <= s_result_acc2;
       end if;
     end if;
   end process p_acc2;
