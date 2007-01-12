@@ -33,6 +33,7 @@ function sig_one(size : natural) return std_logic_vector;
 
 type t_acc_mode is (acc_store, acc_sumstore, acc_diff, acc_add, acc_sub, acc_back_add, acc_minback_add, acc_minback_sub);
 type t_alu_select is (alu_add, alu_muladd, alu_mul, alu_cmul, alu_cmul_conj);
+type t_cmp_mode is (cmp_acc1, cmp_acc2);
 
 end dspalu_pac;
 

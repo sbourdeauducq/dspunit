@@ -40,11 +40,19 @@ entity dspalu_acc is
     acc_mode1                : in t_acc_mode;
     acc_mode2                : in t_acc_mode;
     alu_select               : in t_alu_select;
+    cmp_mode                 : in t_cmp_mode;
+  cmp_pol                    : in std_logic;
+  cmp_store                  : in std_logic;
+  chain_acc                  : in std_logic;
     --@outputs
     result1                  : out std_logic_vector((sig_width - 1) downto 0);
     result_acc1              : out std_logic_vector((acc_width - 1) downto 0);
     result2                  : out std_logic_vector((sig_width - 1) downto 0);
-    result_acc2              : out std_logic_vector((acc_width - 1) downto 0)
+    result_acc2              : out std_logic_vector((acc_width - 1) downto 0);
+    result_sum               : out std_logic_vector((2*sig_width - 1) downto 0);
+  cmp_reg                    : out std_logic_vector((acc_width - 1) downto 0);
+  cmp_greater                    : out std_logic;
+  cmp_out                    : out std_logic
 );
 end dspalu_acc;
 --=----------------------------------------------------------------------------
@@ -170,6 +178,47 @@ begin  -- archs_dspalu_acc
     end if;
   end process p_acc2;
   -------------------------------------------------------------------------------
+  -- Comparator
+  -------------------------------------------------------------------------------
+--  p_cmp_in : process (cmp_mode, s_result_acc1, s_result_acc2, s_cmp_reg, s_cmp_in)
+  p_cmp_in : process (clk)
+  begin -- process p_cmp_in
+    if rising_edge(clk) then
+      case cmp_mode is
+	when cmp_acc1 =>
+	  if(s_result_acc1(acc_width - 1) = '0') then
+	    s_cmp_in <= s_result_acc1;
+	  else
+	    s_cmp_in <= -s_result_acc1;
+	  end if;
+	when cmp_acc2 =>
+	  if(s_result_acc2(acc_width - 2) = '0') then
+	    s_cmp_in <= s_result_acc2;
+	  else
+	    s_cmp_in <= -s_result_acc2;
+	  end if;
+	when others =>
+	  s_cmp_in <= (others => '0');
+      end case;
+      if(s_cmp_reg < s_cmp_in) then
+	s_cmp_greater <= '1';
+      else
+	s_cmp_greater <= '0';
+      end if;
+    end if;
+  end process p_cmp_in;
+  p_cmp : process (clk)
+  begin -- process p_cmp_in
+    if rising_edge(clk) then  -- rising clock edge
+      if(((s_cmp_greater xor cmp_pol) or cmp_store) = '1') then
+	s_cmp_reg <= s_cmp_in;
+	cmp_out <= '1';
+      else
+	cmp_out <= '0';
+      end if;
+    end if;
+  end process p_cmp;
+  -------------------------------------------------------------------------------
   -- Operation controller (manage the complex multiplication)
   -------------------------------------------------------------------------------
   p_alu_ctrl : process (clk)
@@ -245,5 +294,9 @@ begin  -- archs_dspalu_acc
   s_mul_b2_in           <= b1 when (s_cmul_state = cmul_end and (alu_select = alu_cmul or alu_select = alu_cmul_conj)) else s_b2;
   -- ------------------------------------------------------------------------------------------------------------------------
   s_b2               <= std_logic_vector(-signed(b2)) when alu_select = alu_cmul_conj else b2;
+--  result_sum         <= (others => '0');
+  result_sum       <= std_logic_vector(s_result_sum);
+  cmp_reg <= std_logic_vector(s_cmp_reg);
+  cmp_greater <= s_cmp_greater;
 end archi_dspalu_acc;
 -------------------------------------------------------------------------------

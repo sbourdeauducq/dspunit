@@ -32,23 +32,31 @@ architecture archi_bench_dspalu of bench_dspalu is
   end component;
   component dspalu_acc
     generic (
-      sig_width               : integer ;
-      acc_width		    : integer
+      sig_width : integer ;
+      acc_width : integer
 	);
     port (
-      a1                       : in std_logic_vector((sig_width - 1) downto 0);
-      b1                       : in std_logic_vector((sig_width - 1) downto 0);
-      a2                       : in std_logic_vector((sig_width - 1) downto 0);
-      b2                       : in std_logic_vector((sig_width - 1) downto 0);
-      clk                      : in std_logic;
-      clr_acc                  : in std_logic;
+      a1          : in  std_logic_vector((sig_width - 1) downto 0);
+      b1          : in  std_logic_vector((sig_width - 1) downto 0);
+      a2          : in  std_logic_vector((sig_width - 1) downto 0);
+      b2          : in  std_logic_vector((sig_width - 1) downto 0);
+      clk         : in  std_logic;
+      clr_acc     : in  std_logic;
       acc_mode1                : in t_acc_mode;
       acc_mode2                : in t_acc_mode;
       alu_select               : in t_alu_select;
-      result1                  : out std_logic_vector((sig_width - 1) downto 0);
-      result_acc1              : out std_logic_vector((acc_width - 1) downto 0);
-      result2                  : out std_logic_vector((sig_width - 1) downto 0);
-      result_acc2              : out std_logic_vector((acc_width - 1) downto 0)
+      cmp_mode    : in  t_cmp_mode;
+      cmp_pol     : in  std_logic;
+      cmp_store   : in  std_logic;
+      chain_acc   : in  std_logic;
+      result1     : out std_logic_vector((sig_width - 1) downto 0);
+      result_acc1 : out std_logic_vector((acc_width - 1) downto 0);
+      result2     : out std_logic_vector((sig_width - 1) downto 0);
+      result_acc2 : out std_logic_vector((acc_width - 1) downto 0);
+      result_sum  : out std_logic_vector((2*sig_width - 1) downto 0);
+      cmp_reg     : out std_logic_vector((acc_width - 1) downto 0);
+      cmp_greater : out std_logic;
+      cmp_out     : out std_logic
 	);
   end component;
   --=--------------------------------------------------------------------------
@@ -68,6 +76,14 @@ architecture archi_bench_dspalu of bench_dspalu is
   signal s_result_acc1       : std_logic_vector((acc_width - 1) downto 0);
   signal s_result2           : std_logic_vector((sig_width - 1) downto 0);
   signal s_result_acc2       : std_logic_vector((acc_width - 1) downto 0);
+  signal s_cmp_mode          : t_cmp_mode;
+  signal s_cmp_pol           : std_logic;
+  signal s_cmp_store         : std_logic;
+  signal s_chain_acc         : std_logic;
+  signal s_cmp_reg           : std_logic_vector((acc_width - 1) downto 0);
+  signal s_cmp_greater       : std_logic;
+  signal s_cmp_out           : std_logic;
+  signal s_result_sum        : std_logic_vector((2*sig_width - 1) downto 0);
 begin  -- archs_bench_dspalu
   -----------------------------------------------------------------------------
   --
@@ -96,10 +112,18 @@ begin  -- archs_bench_dspalu
 	  acc_mode1 	=> s_acc_mode1,
 	  acc_mode2 	=> s_acc_mode2,
 	  alu_select 	=> s_alu_select,
+	  cmp_mode 	=> s_cmp_mode,
+	  cmp_pol 	=> s_cmp_pol,
+	  cmp_store 	=> s_cmp_store,
+	  chain_acc 	=> s_chain_acc,
 	  result1 	=> s_result1,
 	  result_acc1 	=> s_result_acc1,
 	  result2 	=> s_result2,
-	  result_acc2 	=> s_result_acc2);
+	  result_acc2 	=> s_result_acc2,
+	  result_sum 	=> s_result_sum,
+	  cmp_reg 	=> s_cmp_reg,
+	  cmp_greater 	=> s_cmp_greater,
+	  cmp_out 	=> s_cmp_out);
 
   --=---------------------------------------------------------------------------
   --=---------------------------------------------------------------------------
