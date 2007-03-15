@@ -100,6 +100,22 @@ architecture archi_dspunit of dspunit is
     cmp_out                    : out std_logic
 	);
   end component;
+  component conv_circ
+    port (
+      clk                      : in std_logic;
+      op_en                    : in std_logic;
+      alu_result1              : in std_logic_vector((sig_width - 1) downto 0);
+      alu_result_acc1          : in std_logic_vector((acc_width - 1) downto 0);
+      alu_result2              : in std_logic_vector((sig_width - 1) downto 0);
+      alu_result_acc2          : in std_logic_vector((acc_width - 1) downto 0);
+      gcount                   : in unsigned(15 downto 0);
+      data_in_m0               : in std_logic_vector((sig_width - 1) downto 0);
+      data_in_m1               : in std_logic_vector((sig_width - 1) downto 0);
+      length_reg               : in std_logic_vector((cmdreg_width -1) downto 0);
+      dsp_bus                  : out t_dsp_bus;
+    test                     : out std_logic_vector((sig_width - 1) downto 0)
+	);
+  end component;
   component cpflip
     port (
       clk                      : in std_logic;
@@ -141,6 +157,8 @@ architecture archi_dspunit of dspunit is
   signal s_alu_result_sum    : std_logic_vector((2 * sig_width - 1) downto 0);
   signal s_gcount             : unsigned(15 downto 0);
   signal s_dsp_bus           : t_dsp_bus;
+  signal s_dsp_bus_conv_circ : t_dsp_bus;
+  signal s_op_conv_circ_en   : std_logic;
   signal s_opflag_select_inreg  : std_logic_vector((opflag_width - 1) downto 0);
   signal s_opflag_select     : std_logic_vector((opflag_width - 1) downto 0);
   signal s_opcode_select_inreg  : std_logic_vector((opcode_width - 1) downto 0);
@@ -195,6 +213,21 @@ begin  -- archs_dspunit
 	  cmp_reg       => s_alu_cmp_reg,
 	cmp_greater => s_cmp_greater,
 	cmp_out => s_alu_cmp_out);
+
+  conv_circ_1 : conv_circ
+    port map (
+	  clk 	=> clk,
+	  op_en 	=> s_op_conv_circ_en,
+	  alu_result1 	=> s_alu_result1,
+	  alu_result_acc1 	=> s_alu_result_acc1,
+	  alu_result2 	=> s_alu_result2,
+	  alu_result_acc2 	=> s_alu_result_acc2,
+	  gcount 	=> s_gcount,
+	  data_in_m0 	=> data_in_m0,
+	  data_in_m1 	=> data_in_m1,
+	  length_reg => s_dsp_cmdregs(DSPADDR_LENGTH0),
+	  dsp_bus 	=> s_dsp_bus_conv_circ,
+	  test => s_test);
 
   cpflip_1 : cpflip
     port map (
@@ -308,10 +341,12 @@ begin  -- archs_dspunit
   -------------------------------------------------------------------------------
   s_opcode_select_inreg <= s_dsp_cmdregs(DSPADDR_OPCODE)((opcode_width - 1) downto 0) when s_runop = '1' else (others => '0');
   s_opflag_select_inreg <= s_dsp_cmdregs(DSPADDR_OPCODE)((opflag_width + opcode_width - 1) downto (opcode_width));
+  s_op_conv_circ_en <= '1' when s_opcode_select = opcode_conv_circ else '0';
   s_op_cpflip_en <= '1' when s_opcode_select = opcode_cpflip else '0';
   s_op_cpmem_en <= '1' when s_opcode_select = opcode_cpmem else '0';
   s_op_sigshift_en <= '1' when s_opcode_select = opcode_sigshift else '0';
   s_dsp_bus         <=
+      s_dsp_bus_conv_circ when s_opcode_select = opcode_conv_circ else
       s_dsp_bus_cpflip when s_opcode_select = opcode_cpflip else
       s_dsp_bus_cpmem when s_opcode_select = opcode_cpmem else
       s_dsp_bus_sigshift when s_opcode_select = opcode_sigshift else
