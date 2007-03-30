@@ -1,0 +1,48 @@
+[size] 1280 1002
+[pos] -1 -1
+*-23.928341 324400000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] dspunit_1.
+@28
+dspunit_1.fft_1.clk
+dspunit_1.fft_1.op_en
+@22
+dspunit_1.fft_1.data_in_m0[15:0]
+dspunit_1.fft_1.data_in_m2[15:0]
+dspunit_1.fft_1.result1[15:0]
+dspunit_1.fft_1.result2[15:0]
+dspunit_1.fft_1.s_addr_r_m0_tmp[15:0]
+dspunit_1.fft_1.s_angle_ofset[12:0]
+@200
+-
+@22
+dspunit_1.fft_1.s_butter_group[13:0]
+dspunit_1.fft_1.s_butter_index[13:0]
+dspunit_1.fft_1.s_butter_offset[13:0]
+dspunit_1.fft_1.s_next_group[13:0]
+dspunit_1.fft_1.s_next_index[13:0]
+@200
+-
+@22
+dspunit_1.fft_1.s_out_u1_r[15:0]
+dspunit_1.fft_1.s_out_u2_r[15:0]
+dspunit_1.fft_1.s_out_y2_r[15:0]
+@200
+-
+@22
+dspunit_1.fft_1.s_radix_count[13:0]
+dspunit_1.fft_1.s_radix_count_down[12:0]
+dspunit_1.fft_1.s_radix_half[13:0]
+dspunit_1.fft_1.s_length_plus[15:0]
+@200
+-
+@22
+gen_memory_1.address_a[15:0]
+gen_memory_1.address_b[15:0]
+gen_memory_1.data_a[15:0]
+gen_memory_1.data_b[15:0]
+gen_memory_1.q_a[15:0]
+gen_memory_1.q_b[15:0]
+@28
+gen_memory_1.s_w_clk
+gen_memory_1.wren_a
+gen_memory_1.wren_b

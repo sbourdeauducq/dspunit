@@ -1,0 +1,51 @@
+[size] 1366 744
+[pos] -1 -1
+*-24.557178 9295200000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] dspunit_1.
+@28
+dspunit_1.s_runop
+dspunit_1.s_runop_sync
+@22
+dspunit_1.s_opcode_select[3:0]
+@200
+-
+-Memory 1 (m0)
+@22
+gen_memory_1.data_b[15:0]
+gen_memory_1.s_address_b[15:0]
+@28
+gen_memory_1.wren_b
+gen_memory_1.clock_a
+@200
+-
+@22
+dspunit_1.dspalu_acc_1.s_mul_a1[15:0]
+dspunit_1.dspalu_acc_1.s_mul_a2[15:0]
+dspunit_1.dspalu_acc_1.s_mul_b1[15:0]
+dspunit_1.dspalu_acc_1.s_mul_b2[15:0]
+@200
+-
+@22
+dspunit_1.dspalu_acc_1.s_result_acc1[39:0]
+dspunit_1.dspalu_acc_1.s_result_acc2[39:0]
+@200
+-
+@22
+gen_memory_1.address_a[15:0]
+gen_memory_1.q_a[15:0]
+@200
+-
+@23
+dspunit_1.dotcmul_1.s_data_y1[15:0]
+dspunit_1.dotcmul_1.s_data_y2[15:0]
+@200
+-
+-Memory 2 (m1)
+@22
+gen_memory_2.address_a[15:0]
+gen_memory_2.data_a[15:0]
+gen_memory_2.q_a[15:0]
+@28
+gen_memory_2.wren_a
+@24
+dspunit_1.dotcmul_1.s_module[31:0]

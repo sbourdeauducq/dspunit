@@ -62,7 +62,6 @@ architecture archi_bench_dspunit of bench_dspunit is
       data_in_cmdreg           : in std_logic_vector((cmdreg_data_width - 1) downto 0);
       wr_en_cmdreg                : in std_logic;
       data_out_cmdreg          : out std_logic_vector((cmdreg_data_width - 1) downto 0);
-      debug                    : out std_logic_vector(15 downto 0);
       op_done                     : out std_logic
 	);
   end component;
@@ -139,7 +138,6 @@ architecture archi_bench_dspunit of bench_dspunit is
   signal s_wr_en_cmdreg      : std_logic;
   signal s_data_out_cmdreg   : std_logic_vector((cmdreg_data_width - 1) downto 0);
   signal s_op_done           : std_logic;
-  signal s_debug_dsp         : std_logic_vector(15 downto 0);
 begin  -- archs_bench_dspunit
   -----------------------------------------------------------------------------
   --
@@ -171,7 +169,6 @@ begin  -- archs_bench_dspunit
 	  data_in_cmdreg 	=> s_data_in_cmdreg,
 	  wr_en_cmdreg 	=> s_wr_en_cmdreg,
 	  data_out_cmdreg 	=> s_data_out_cmdreg,
-	  debug                 => s_debug_dsp,
 	  op_done 	=> s_op_done);
 
   gen_memory_1 : gen_memoryf
@@ -245,7 +242,7 @@ begin  -- archs_bench_dspunit
                          "000100" after 8741 ns, "000010" after 8751 ns, "000111" after 8761 ns, "001000" after 8771 ns,
 			 "000001" after 11321 ns,
                          "000010" after 11341 ns, "000100" after 11351 ns, "000111" after 11361 ns, "001000" after 11371 ns,
-                         "000100" after 19861 ns, "000010" after 19871 ns, "000111" after 19881 ns, "001000" after 19891 ns,
+                         "000010" after 19871 ns, "000111" after 19881 ns, "001000" after 19891 ns,
                          "000010" after 22341 ns, "000100" after 22351 ns, "000111" after 22361 ns, "001000" after 22371 ns,
                          "000010" after 30871 ns, "000111" after 30881 ns, "001000" after 30891 ns;
   s_data_in_cmdreg  <= x"0000", x"003F" after 141 ns, x"003F" after 151 ns, x"003C" after 161 ns, x"0002" after 171 ns, -- ifft bitrev
@@ -253,14 +250,14 @@ begin  -- archs_bench_dspunit
                          x"0072" after 8741 ns, x"0080" after 8751 ns, x"0026" after 8761 ns, x"0002" after 8771 ns,	    -- sigshift bitrev
 			 x"0080" after 11321 ns,
                          x"003F" after 11341 ns, x"000F" after 11351 ns, x"000C" after 11361 ns, x"0002" after 11371 ns, -- fft
-                         x"0000" after 19861 ns, x"003F" after 19871 ns, x"000D" after 19881 ns, x"0002" after 19891 ns,    -- dotcmul
+                         x"003F" after 19871 ns, x"000D" after 19881 ns, x"0002" after 19891 ns,    -- dotcmul
 			 x"003F" after 22341 ns, x"000A" after 22351 ns, x"003C" after 22361 ns, x"0002" after 22371 ns, -- ifft bitrev
-                         x"003F" after 30871 ns, x"002D" after 30881 ns, x"0002" after 30891 ns;    -- dotcmul bitrev
+--                         x"003F" after 30871 ns, x"002D" after 30881 ns, x"0002" after 30891 ns;    -- dotcmul bitrev
   s_wr_en_cmdreg    <= '0', '1' after 141 ns, '0' after 181 ns,
 		        '1' after 8741 ns, '0' after 8781 ns,
                         '1' after 11321 ns, '0' after 11331 ns,
                         '1' after 11341 ns, '0' after 11381 ns,
-                        '1' after 19861 ns, '0' after 19901 ns,
+                        '1' after 19871 ns, '0' after 19901 ns,
                         '1' after 22341 ns, '0' after 22381 ns,
                         '1' after 30871 ns, '0' after 30901 ns;
 end archi_bench_dspunit;

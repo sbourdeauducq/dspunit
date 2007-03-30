@@ -35,6 +35,10 @@ constant cmdreg_addr_width  : natural := 6;
 constant cmdreg_data_width  : positive := 16;
 constant cmdreg_width	    : positive := 16;
 constant acc_width          : positive := 40;
+constant lut_in_width       : positive := 13;
+constant lut_sel_width      : positive := 4;
+constant lut_out_width      : positive := sig_width;
+constant angle_width	    : positive := 13;
 
 
 function sig_cst_init(realval : real) return std_logic_vector;
@@ -75,6 +79,9 @@ type t_dsp_bus is
     cmp_store               : std_logic;
     -- global counter
     gcounter_reset          : std_logic;
+    -- shared lut
+    lut_in		    : std_logic_vector((lut_in_width - 1) downto 0);
+    lut_select		    : std_logic_vector((lut_sel_width - 1) downto 0);
   end record;
 
 constant c_dsp_bus_init            : t_dsp_bus := (
@@ -107,7 +114,10 @@ constant c_dsp_bus_init            : t_dsp_bus := (
   cmp_pol              => '0',
   cmp_store            => '1',
   -- global counter
-  gcounter_reset       => '1'
+  gcounter_reset       => '1',
+  -- shared lut
+  lut_in	       => (others => '0'),
+  lut_select	       => (others => '0')
 );
 -------------------------------------------------------------------------------
 -- Register address
@@ -132,12 +142,17 @@ constant DSP_SRBIT_LOADED : natural := 2;
 constant opcode_width : positive := 4;
 constant opcode_conv_circ : std_logic_vector((opcode_width - 1) downto 0) := "0001";
 constant opcode_cpflip : std_logic_vector((opcode_width - 1) downto 0) := "0010";
+constant opcode_dotop : std_logic_vector((opcode_width - 1) downto 0) := "0011";
 constant opcode_cpmem : std_logic_vector((opcode_width - 1) downto 0) := "0100";
 constant opcode_setmem : std_logic_vector((opcode_width - 1) downto 0) := "0101";
 constant opcode_sigshift : std_logic_vector((opcode_width - 1) downto 0) := "0110";
+constant opcode_fft : std_logic_vector((opcode_width - 1) downto 0) := "1100";
+constant opcode_dotcmul : std_logic_vector((opcode_width - 1) downto 0) := "1101";
 
 -- opflags (options related to each operation)
 constant opflag_width : positive := 8;
+constant opflag_ifft : std_logic_vector((opflag_width - 1) downto 0) := "00000001";
+constant opflagbit_ifft : natural := 0;
 constant opflag_bitrev : std_logic_vector((opflag_width - 1) downto 0) := "00000010";
 constant opflagbit_bitrev : natural := 1;
 constant opflag_mainmem : std_logic_vector((opflag_width - 1) downto 0) := "00000010";
@@ -153,6 +168,10 @@ constant opflag_m2 : std_logic_vector((opflag_width - 1) downto 0) := "10000000"
 constant opflagbit_m2 : natural := 7;
 
 
+-- selection of math lut
+constant lutsel_none : std_logic_vector((lut_sel_width - 1) downto 0) := "0000";
+constant lutsel_cos : std_logic_vector((lut_sel_width - 1) downto 0) := "0001";
+constant lutsel_sin : std_logic_vector((lut_sel_width - 1) downto 0) := "0010";
 end dspunit_pac;
 
 package body dspunit_pac is
