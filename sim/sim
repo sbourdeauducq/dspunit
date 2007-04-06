@@ -1,4 +1,8 @@
 #!/bin/sh
+shdir=`echo $0|sed -e 's/\/[^\/]*$//'`
+echo "cd to $shdir"
+cd "$shdir"
+sed -i -e 's/^file "[^"]*"/file ""/' work/work-obj93.cf
 case $1 in
     build ) ghdl -m -Wl,-lm --ieee=synopsys --workdir=work bench_$2;;
     clean ) rm work/*.o;;
