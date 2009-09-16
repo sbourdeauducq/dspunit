@@ -34,7 +34,7 @@ entity dotcmul is
 	 data_in_m0               : in std_logic_vector((sig_width - 1) downto 0);
 	 data_in_m1               : in std_logic_vector((sig_width - 1) downto 0);
 	 length_reg               : in std_logic_vector((cmdreg_data_width -1) downto 0);
-	 mask_reg               : in std_logic_vector((cmdreg_data_width -1) downto 0);
+	 length_kern_reg          : in std_logic_vector((cmdreg_data_width -1) downto 0);
 	 opflag_select            : in std_logic_vector((opflag_width - 1) downto 0);
 	 result1                    : in std_logic_vector((sig_width - 1) downto 0);
 	 result2                    : in std_logic_vector((sig_width - 1) downto 0);
@@ -77,7 +77,6 @@ architecture archi_dotcmul of dotcmul is
   signal s_out_u1         : std_logic_vector((sig_width - 1) downto 0);
   signal s_out_u2         : std_logic_vector((sig_width - 1) downto 0);
   signal s_datastate       : t_datastate;
-  signal s_length_plus     : unsigned((cmdreg_width - 1) downto 0);
   type t_addr_pipe is array(0 to c_addr_pipe_depth - 1) of unsigned((cmdreg_width - 1) downto 0);
   type t_wr_pipe is array(0 to c_addr_pipe_depth - 1) of std_logic;
   signal s_addr_pipe         : t_addr_pipe;
@@ -90,6 +89,8 @@ architecture archi_dotcmul of dotcmul is
   signal s_addr_r_m1_tmp     : unsigned((cmdreg_width - 1) downto 0);
   signal s_imag_part         : std_logic;
 --  signal s_module            : integer;
+  signal s_mask_reg          : unsigned((cmdreg_width - 1) downto 0);
+  signal s_length_kern       : unsigned((cmdreg_width - 1) downto 0);
 begin  -- archs_dotcmul
   -----------------------------------------------------------------------------
   --
@@ -139,8 +140,8 @@ begin  -- archs_dotcmul
 	  when st_performft =>
 	    -- In this state : reading, computing butterfly and writting
 	      -- are done concurently
-	    -- if s_radix_half > s_length_plus then
-	    if s_sample_index = s_length_plus then
+	    -- if s_radix_half > s_length then
+	    if s_sample_index = s_length then
 	      --s_dsp_bus.wr_en_m1 <= '1';
 	      s_state <= st_copy;
 	    end if;
@@ -236,7 +237,7 @@ begin  -- archs_dotcmul
 	  s_imag_part <= '1';
 
 	-- else compute index of next sample
-	-- elsif (s_next_index < s_length_plus) then
+	-- elsif (s_next_index < s_length) then
 	else
 	  -- increment index
 	  s_sample_index <= s_next_index((c_ind_width - 1) downto 0);
@@ -292,34 +293,34 @@ begin  -- archs_dotcmul
   s_addr_r_m0_tmp((c_ind_width) downto 1) <= s_sample_index when opflag_select(opflagbit_bitrev)='0' else
 			 zeros(c_ind_width - 4) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 4))
-			    when s_length_plus(4) = '1' else
+			    when length_kern_reg(4) = '1' else
 			 zeros(c_ind_width - 5) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 5))
-			    when s_length_plus(5) = '1' else
+			    when length_kern_reg(5) = '1' else
 			 zeros(c_ind_width - 6) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 6))
-			    when s_length_plus(6) = '1' else
+			    when length_kern_reg(6) = '1' else
 			 zeros(c_ind_width - 7) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 7))
-			    when s_length_plus(7) = '1' else
+			    when length_kern_reg(7) = '1' else
 			 zeros(c_ind_width - 8) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 8))
-			    when s_length_plus(8) = '1' else
+			    when length_kern_reg(8) = '1' else
 			 zeros(c_ind_width - 9) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 9))
-			    when s_length_plus(9) = '1' else
+			    when length_kern_reg(9) = '1' else
 			 zeros(c_ind_width - 10) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 10))
-			    when s_length_plus(10) = '1' else
+			    when length_kern_reg(10) = '1' else
 			 zeros(c_ind_width - 11) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 11))
-			    when s_length_plus(11) = '1' else
+			    when length_kern_reg(11) = '1' else
 			 zeros(c_ind_width - 12) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 12))
-			    when s_length_plus(12) = '1' else
+			    when length_kern_reg(12) = '1' else
 			 zeros(c_ind_width - 13) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 13))
-			    when s_length_plus(13) = '1' else
+			    when length_kern_reg(13) = '1' else
 			 s_sample_index_rev;
 
 
@@ -329,16 +330,18 @@ begin  -- archs_dotcmul
   s_dsp_bus.addr_r_m0 <= s_addr_r_m0_tmp;
 
 --  s_dsp_bus.addr_m1 <= s_dsp_bus.addr_r_m0;
---  s_dsp_bus.addr_m1 <= s_addr_r_m1_tmp and (not mask_reg);
+--  s_dsp_bus.addr_m1 <= s_addr_r_m1_tmp and (not s_mask_reg);
   s_dsp_bus.addr_m1 <= unsigned(bitbit_and(std_logic_vector(s_addr_r_m1_tmp),
-		       std_logic_vector(not mask_reg)));
+		       std_logic_vector(s_mask_reg)));
   s_dsp_bus.addr_w_m0 <= s_addr_pipe(c_addr_pipe_depth - 1);
   s_dsp_bus.wr_en_m0 <= s_wr_pipe(c_addr_pipe_depth - 1);
 
 
   -- specific index relations
   s_length          <= unsigned(length_reg);
-  s_length_plus	    <= s_length + 1;
+  -- left shift because real length is double (complex values)
+  s_length_kern     <= unsigned(length_kern_reg((cmdreg_data_width - 2) downto 0) & '0');
+  s_mask_reg         <= s_length_kern - 1;
 
 --  s_module <= module(signed(s_data_y1), signed(s_data_y2));
  end archi_dotcmul;

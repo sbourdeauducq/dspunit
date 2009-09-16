@@ -175,7 +175,7 @@ architecture archi_dspunit of dspunit is
   	 data_in_m0               : in std_logic_vector((sig_width - 1) downto 0);
   	 data_in_m1               : in std_logic_vector((sig_width - 1) downto 0);
   	 length_reg               : in std_logic_vector((cmdreg_width -1) downto 0);
-  	 mask_reg               : in std_logic_vector((cmdreg_width -1) downto 0);
+  	 length_kern_reg               : in std_logic_vector((cmdreg_width -1) downto 0);
 	 opflag_select            : in std_logic_vector((opflag_width - 1) downto 0);
   	 result1                    : in std_logic_vector((sig_width - 1) downto 0);
   	 result2                    : in std_logic_vector((sig_width - 1) downto 0);
@@ -357,7 +357,7 @@ begin  -- archs_dspunit
 	  data_in_m0 	=> data_in_m0,
 	  data_in_m1 	=> data_in_m1,
 	  length_reg 	=> s_dsp_cmdregs(DSPADDR_LENGTH0),
-	  mask_reg 	=> s_dsp_cmdregs(DSPADDR_LENGTH1),
+	  length_kern_reg 	=> s_dsp_cmdregs(DSPADDR_LENGTH1),
 	  opflag_select => s_opflag_select,
 --	  result1 	=> s_alu_result_acc1((2*sig_width - 2) downto (sig_width - 1)),
 --	  result2 	=> s_alu_result_acc2((2*sig_width - 2) downto (sig_width - 1)),
@@ -428,7 +428,6 @@ begin  -- archs_dspunit
       end loop;
     end if;
   end process p_cmdreg_buf;
-  debug <= s_dsp_cmdregs(DSPADDR_SR);
   s_run_buf <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);
   s_refresh_cmdregs_in <= (not s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_RUN)) and s_run_buf;
   -------------------------------------------------------------------------------

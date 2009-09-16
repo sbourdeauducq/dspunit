@@ -63,7 +63,7 @@ architecture archi_fft of fft is
   type t_fft_state is (st_init, st_startpipe, st_performft, st_copy);
   type t_datastate is (st_data_y1, st_data_y2, st_data_u1, st_data_u2);
   signal s_state             : t_fft_state;
-  signal s_length            : unsigned((cmdreg_width - 1) downto 0);
+  signal s_length_moins            : unsigned((cmdreg_width - 1) downto 0);
   signal s_data_y1_r         : std_logic_vector((sig_width - 1) downto 0);
   signal s_data_y2_r         : std_logic_vector((sig_width - 1) downto 0);
   signal s_data_u1_r         : std_logic_vector((sig_width - 1) downto 0);
@@ -79,7 +79,7 @@ architecture archi_fft of fft is
   signal s_out_u1         : std_logic_vector((sig_width - 1) downto 0);
   signal s_out_u2         : std_logic_vector((sig_width - 1) downto 0);
   signal s_datastate       : t_datastate;
-  signal s_length_plus     : unsigned((cmdreg_width - 1) downto 0);
+  signal s_length     : unsigned((cmdreg_width - 1) downto 0);
   signal s_radix_count     : unsigned((c_ind_width - 1) downto 0);
   signal s_radix_half    : unsigned((c_ind_width - 1) downto 0);
   type t_addr_pipe is array(0 to c_addr_pipe_depth - 1) of unsigned((cmdreg_width - 1) downto 0);
@@ -157,8 +157,8 @@ begin  -- archs_fft
 	  when st_performft =>
 	    -- In this state : reading, computing butterfly and writting
 	      -- are done concurently
-	    -- if s_radix_half > s_length_plus then
---	    if s_radix_count > s_length_plus then
+	    -- if s_radix_half > s_length then
+--	    if s_radix_count > s_length then
 	    if s_end_ft = '1' then
 	      --s_dsp_bus.wr_en_m1 <= '1';
 	      s_state <= st_copy;
@@ -342,7 +342,7 @@ begin  -- archs_fft
 	s_imag_part <= '0';
 	s_end_ft <= '0';
 
-	-- s_radix_count_down <= '0' & s_length_plus((c_ind_width - 1) downto 1);
+	-- s_radix_count_down <= '0' & s_length((c_ind_width - 1) downto 1);
 	s_radix_count_down <= to_unsigned(2**(angle_width - 1), angle_width);
 	s_angle <= to_unsigned(0, angle_width);
 	s_angle_offset <= to_unsigned(0, angle_width);
@@ -382,7 +382,7 @@ begin  -- archs_fft
 	  s_imag_part <= '0';
 	  -- increment angle
 	  s_angle <= s_angle + s_radix_count_down;
-	elsif (s_next_group < s_length) then
+	elsif (s_next_group < s_length_moins) then
 	  -- next group
 	  s_butter_index <= to_unsigned(0, c_ind_width);
 	  s_butter_group <= s_next_group((c_ind_width - 1) downto 0);
@@ -390,7 +390,7 @@ begin  -- archs_fft
 	  s_imag_part <= '0';
 	  -- reset angle
 	  s_angle <= to_unsigned(0, angle_width);
-	elsif(s_radix_count = s_length_plus) then
+	elsif(s_radix_count = s_length) then
 	  s_end_ft <= '1';
 	else
 	  -- next radix (left shift)
@@ -461,34 +461,34 @@ begin  -- archs_fft
   s_addr_r_m0_tmp((c_ind_width) downto 1) <= s_sample_index when opflag_select(opflagbit_bitrev)='0' else
 			 zeros(c_ind_width - 4) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 4))
-			    when s_length_plus(4) = '1' else
+			    when s_length(4) = '1' else
 			 zeros(c_ind_width - 5) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 5))
-			    when s_length_plus(5) = '1' else
+			    when s_length(5) = '1' else
 			 zeros(c_ind_width - 6) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 6))
-			    when s_length_plus(6) = '1' else
+			    when s_length(6) = '1' else
 			 zeros(c_ind_width - 7) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 7))
-			    when s_length_plus(7) = '1' else
+			    when s_length(7) = '1' else
 			 zeros(c_ind_width - 8) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 8))
-			    when s_length_plus(8) = '1' else
+			    when s_length(8) = '1' else
 			 zeros(c_ind_width - 9) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 9))
-			    when s_length_plus(9) = '1' else
+			    when s_length(9) = '1' else
 			 zeros(c_ind_width - 10) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 10))
-			    when s_length_plus(10) = '1' else
+			    when s_length(10) = '1' else
 			 zeros(c_ind_width - 11) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 11))
-			    when s_length_plus(11) = '1' else
+			    when s_length(11) = '1' else
 			 zeros(c_ind_width - 12) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 12))
-			    when s_length_plus(12) = '1' else
+			    when s_length(12) = '1' else
 			 zeros(c_ind_width - 13) &
 			    s_sample_index_rev((c_ind_width - 1) downto (c_ind_width - 13))
-			    when s_length_plus(13) = '1' else
+			    when s_length(13) = '1' else
 			 s_sample_index_rev;
 
 
@@ -501,7 +501,7 @@ begin  -- archs_fft
 
   -- specific index relations
   s_length          <= unsigned(length_reg);
-  s_length_plus	    <= s_length + 1;
+  s_length_moins	    <= s_length - 1;
   s_radix_half	    <= '0' & s_radix_count((c_ind_width - 1) downto 1);
 
   -- trigonometry
