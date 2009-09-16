@@ -1,21 +1,24 @@
+--   ----------------------------------------------------------------------
+--   DspUnit : Advanced So(P)C Sequential Signal Processor
+--   Copyright (C) 2007-2009 by Adrien LELONG (www.lelongdunet.com)
+--
+--   This program is free software; you can redistribute it and/or modify
+--   it under the terms of the GNU General Public License as published by
+--   the Free Software Foundation; either version 2 of the License, or
+--   (at your option) any later version.
+--
+--   This program is distributed in the hope that it will be useful,
+--   but WITHOUT ANY WARRANTY; without even the implied warranty of
+--   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+--   GNU General Public License for more details.
+--
+--   You should have received a copy of the GNU General Public License
+--   along with this program; if not, write to the
+--   Free Software Foundation, Inc.,
+--   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+--   ----------------------------------------------------------------------
 
--------------------------------------------------------------------------------
--- Title      :
--- Project    : These
--------------------------------------------------------------------------------
--- File       :
--- Author     : Adrien LELONG
--- Company    :
--- Last update:
--- Platform   : Stratix II (Carte DSP)
--------------------------------------------------------------------------------
--- Description:
---              * Complex multiplication:
---                 - res1 + j*res2 = (a1 + j*a2)*(b1 + j*b2)
--------------------------------------------------------------------------------
--- Revisions  :
--- 2007-11-19  1.0
-------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -85,6 +88,10 @@ architecture archi_dspalu_acc of dspalu_acc is
   signal s_mul_a2            : std_logic_vector((sig_width - 1) downto 0);
   signal s_mul_b1            : std_logic_vector((sig_width - 1) downto 0);
   signal s_mul_b2            : std_logic_vector((sig_width - 1) downto 0);
+  signal s_mul_a1_in            : std_logic_vector((sig_width - 1) downto 0);
+  signal s_mul_a2_in            : std_logic_vector((sig_width - 1) downto 0);
+  signal s_mul_b1_in            : std_logic_vector((sig_width - 1) downto 0);
+  signal s_mul_b2_in            : std_logic_vector((sig_width - 1) downto 0);
   type t_cmul_state is (cmul_step, cmul_end);
   signal s_cmul_state        : t_cmul_state;
   signal s_result_sum        : signed((2*sig_width - 1) downto 0);
@@ -173,8 +180,10 @@ begin  -- archs_dspalu_acc
   -------------------------------------------------------------------------------
   -- Comparator
   -------------------------------------------------------------------------------
-  p_cmp_in : process (cmp_mode, s_result_acc1, s_result_acc2, s_cmp_reg, s_cmp_in)
+--  p_cmp_in : process (cmp_mode, s_result_acc1, s_result_acc2, s_cmp_reg, s_cmp_in)
+  p_cmp_in : process (clk)
   begin -- process p_cmp_in
+    if rising_edge(clk) then
       case cmp_mode is
 	when cmp_acc1 =>
 	  if(s_result_acc1(acc_width - 1) = '0') then
@@ -196,6 +205,7 @@ begin  -- archs_dspalu_acc
       else
 	s_cmp_greater <= '0';
       end if;
+    end if;
   end process p_cmp_in;
   p_cmp : process (clk)
   begin -- process p_cmp_in
@@ -233,11 +243,12 @@ begin  -- archs_dspalu_acc
       --s_result_sum <= s_mul_out1 + s_mul_out2;
     end if;
   end process p_sum_reg;
+
+  s_result1 <= s_mul_out1;
+  s_result2 <= s_mul_out2;
   p_mul_reg : process (clk)
   begin -- process p_mul_reg
     if rising_edge(clk) then  -- rising clock edge
-      s_result1 <= s_mul_out1;
-      s_result2 <= s_mul_out2;
       s_acc_mode1 <= s_acc_mode1_inreg;
       s_acc_mode2 <= s_acc_mode2_inreg;
     end if;
@@ -267,11 +278,21 @@ begin  -- archs_dspalu_acc
   s_acc_mode2_inreg  <= s_cmul_acc_mode2 when s_cmul_state = cmul_step else acc_mode2;
 
   -- multipliers inputs (special selection during complex multiplication)
-  s_mul_a1           <= a2 when s_cmul_state = cmul_step else a1;
-  s_mul_a2           <= a1 when s_cmul_state = cmul_step else a2;
-  s_mul_b1           <= s_b2 when s_cmul_state = cmul_step else b1;
+  p_mul_in_reg : process (clk)
+  begin -- process p_mul_reg
+    if rising_edge(clk) then  -- rising clock edge
+      s_mul_a1           <= s_mul_a1_in;
+      s_mul_a2           <= s_mul_a2_in;
+      s_mul_b1           <= s_mul_b1_in;
+      s_mul_b2           <= s_mul_b2_in;
+    end if;
+  end process p_mul_in_reg;
+  s_mul_a1_in           <= a2 when s_cmul_state = cmul_step else a1;
+  s_mul_a2_in           <= a1 when s_cmul_state = cmul_step else a2;
+  s_mul_b1_in           <= s_b2 when s_cmul_state = cmul_step else b1;
   -- ! can be more time critical than other entries because depends on alu_select
-  s_mul_b2           <= b1 when (s_cmul_state = cmul_end and (alu_select = alu_cmul or alu_select = alu_cmul_conj)) else s_b2;
+  s_mul_b2_in           <= b1 when (s_cmul_state = cmul_end and (alu_select = alu_cmul or alu_select = alu_cmul_conj)) else s_b2;
+  -- ------------------------------------------------------------------------------------------------------------------------
   s_b2               <= std_logic_vector(-signed(b2)) when alu_select = alu_cmul_conj else b2;
 --  result_sum         <= (others => '0');
   result_sum       <= std_logic_vector(s_result_sum);
