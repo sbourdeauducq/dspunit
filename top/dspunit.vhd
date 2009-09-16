@@ -66,6 +66,7 @@ architecture archi_dspunit of dspunit is
   -----------------------------------------------------------------------------
   -- @constants definition
   -----------------------------------------------------------------------------
+  constant c_refresh_cmdreg_length     : integer := 10;
   --=--------------------------------------------------------------------------
   --
   -- @component declarations
@@ -204,6 +205,7 @@ architecture archi_dspunit of dspunit is
   -- @signals definition
   -----------------------------------------------------------------------------
   signal s_dsp_cmdregs       : t_dsp_cmdregs;
+  signal s_dsp_cmdregs_buf   : t_dsp_cmdregs;
   signal s_clr_acc           : std_logic;
   signal s_alu_result1       : std_logic_vector((sig_width - 1) downto 0);
   signal s_alu_result_acc1   : std_logic_vector((acc_width - 1) downto 0);
@@ -243,6 +245,9 @@ architecture archi_dspunit of dspunit is
   signal s_dsp_bus_sigshift     : t_dsp_bus;
   signal s_op_sigshift_en    : std_logic;
   signal s_chain_acc         : std_logic;
+  signal s_refresh_cmdregs   : std_logic_vector((c_refresh_cmdreg_length - 1) downto 0);
+  signal s_run_buf           : std_logic;
+  signal s_refresh_cmdregs_in: std_logic;
 begin  -- archs_dspunit
   -----------------------------------------------------------------------------
   --
@@ -382,42 +387,50 @@ begin  -- archs_dspunit
         s_dsp_cmdregs(i) <= (others => '0');
       end loop;
     elsif rising_edge(clk_cpu) then  -- rising clock edge
-      if(wr_en_cmdreg = '1') then
-        s_dsp_cmdregs(to_integer(unsigned(addr_cmdreg))) <= data_in_cmdreg;
-      else
+--      if(wr_en_cmdreg = '1') then
+--        s_dsp_cmdregs(to_integer(unsigned(addr_cmdreg))) <= data_in_cmdreg;
+      if (s_refresh_cmdregs_in and s_refresh_cmdregs(3)) = '1' then
+	for i in 0 to 15 loop
+	  s_dsp_cmdregs(i) <= s_dsp_cmdregs_buf(i);
+	end loop;
+      elsif (s_refresh_cmdregs(3) = '0') then
         if(s_op_done_resync = '1') then
           s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_OPDONE) <= '1';
 --	if(s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_OPDONE) = 1) then
 	  s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_RUN) <= '0';
 	end if;
+	s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_LOADED) <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);
       end if;
-      data_out_cmdreg   <= s_dsp_cmdregs(to_integer(unsigned(addr_cmdreg)));
+      data_out_cmdreg  <= s_dsp_cmdregs(to_integer(unsigned(addr_cmdreg)));
       s_op_done_sync <= s_dsp_bus.op_done;
       s_op_done_resync <= s_op_done_sync;
     end if;
   end process p_cmdreg;
+  p_cmdreg_buf : process (clk_cpu, reset)
+  begin -- process p_cmdreg_buf
+    if reset = '0' then
+      --for i in 0 to (2**cmdreg_buf_addr_width - 1) loop
+      for i in 0 to 15 loop
+        s_dsp_cmdregs_buf(i) <= (others => '0');
+      end loop;
+    elsif rising_edge(clk_cpu) then  -- rising clock edge
+      if(wr_en_cmdreg = '1') then
+        s_dsp_cmdregs_buf(to_integer(unsigned(addr_cmdreg))) <= data_in_cmdreg;
+      else
+        if((s_refresh_cmdregs(3) and s_refresh_cmdregs(0)) = '1') then
+	  s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN) <= '0';
+	end if;
+      end if;
+      -- Pipeline to generate a delay before refresh cmdregs
+      s_refresh_cmdregs(0) <= s_refresh_cmdregs_in;
+      for i in c_refresh_cmdreg_length - 2 downto 0 loop
+	s_refresh_cmdregs(i + 1) <= s_refresh_cmdregs(i);
+      end loop;
+    end if;
+  end process p_cmdreg_buf;
   debug <= s_dsp_cmdregs(DSPADDR_SR);
---  -------------------------------------------------------------------------------
---  -- Compute a circular convolution
---  -------------------------------------------------------------------------------
---  p_conv_circ : process (clk)
---  begin -- process p_conv_circ
---    elsif rising_edge(clk) then  -- rising clock edge
---      if(conv_circ_op_en = '0') then
---        -- perform reset to all signals associated with
---        s_dsp_bus_conv_circ <= s_dsp_bus_init;
---	s_state_conv_circ <= st_conv_circ_init;
---      else
---        -- Main state machin of the conv_circ operator
---        case s_state_conv_circ is
---	  when st_conv_circ_init =>
---	    s_dsp_bus_conv_circ.addr_r_m0 <= s_dsp_bus_conv_circ.addr_r_m0 + 1;
---	  when others =>
---	    null;
---	end case;
---      end if;
---    end if;
---  end process p_conv_circ;
+  s_run_buf <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);
+  s_refresh_cmdregs_in <= (not s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_RUN)) and s_run_buf;
   -------------------------------------------------------------------------------
   -- Global counter
   -------------------------------------------------------------------------------
