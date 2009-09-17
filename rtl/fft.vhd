@@ -48,9 +48,9 @@ architecture archi_fft of fft is
   -----------------------------------------------------------------------------
   -- @constants definition
   -----------------------------------------------------------------------------
-    constant c_addr_pipe_depth         : integer := 11;
+    constant c_addr_pipe_depth         : integer := 13;
     constant c_ind_width               : integer := cmdreg_width - 2;
-    constant c_shiftflag_pipe_depth    : integer := 9;
+    constant c_shiftflag_pipe_depth    : integer := 10;
   --=--------------------------------------------------------------------------
   --
   -- @component declarations
@@ -79,6 +79,7 @@ architecture archi_fft of fft is
   signal s_out_u1         : std_logic_vector((sig_width - 1) downto 0);
   signal s_out_u2         : std_logic_vector((sig_width - 1) downto 0);
   signal s_datastate       : t_datastate;
+  signal s_datastate_n1       : t_datastate;
   signal s_length     : unsigned((cmdreg_width - 1) downto 0);
   signal s_radix_count     : unsigned((c_ind_width - 1) downto 0);
   signal s_radix_half    : unsigned((c_ind_width - 1) downto 0);
@@ -95,6 +96,7 @@ architecture archi_fft of fft is
   signal s_sample_index_rev  : unsigned((c_ind_width - 1) downto 0);
   signal s_imag_part         : std_logic;
   signal s_addr_r_m0_tmp     : unsigned((cmdreg_width - 1) downto 0);
+  signal s_addr_r_m0_tmp2     : unsigned((cmdreg_width - 1) downto 0);
   signal s_radix_count_down  : unsigned((angle_width - 1) downto 0);
   signal s_angle             : unsigned((angle_width - 1) downto 0);
   signal s_angle_offset       : unsigned((angle_width - 1) downto 0);
@@ -106,6 +108,7 @@ architecture archi_fft of fft is
   signal s_result1_shift     : std_logic_vector((sig_width - 1) downto 0);
   signal s_result2_shift     : std_logic_vector((sig_width - 1) downto 0);
   signal s_end_ft            : std_logic;
+  signal s_angle_total       : std_logic_vector((angle_width - 1) downto 0);
 begin  -- archs_fft
   -----------------------------------------------------------------------------
   --
@@ -186,7 +189,8 @@ begin  -- archs_fft
     if rising_edge(clk) then  -- rising clock edge
       if s_state = st_init then
 	  -- initial state is calculated as a function of pipeline depth
-	  s_datastate <= st_data_u1;
+--	  s_datastate <= st_data_u1;
+	  s_datastate <= st_data_y2;
       else
 	  case s_datastate is
 	      when st_data_y1 =>
@@ -233,7 +237,8 @@ begin  -- archs_fft
   p_datastore : process (clk)
   begin -- process p_datastore
     if rising_edge(clk) then  -- rising clock edge
-      case s_datastate is
+      case s_datastate_n1 is
+--      case s_datastate is
         when st_data_y1 =>
 --	  s_dsp_bus.data_out_m0 <= s_out_y1;
 --	  s_out_y2_r <= s_out_y2;
@@ -253,8 +258,8 @@ begin  -- archs_fft
   -------------------------------------------------------------------------------
   -- compute the butterfly
   -------------------------------------------------------------------------------
-  butterfly_reg : process (clk)
-  begin -- process butterfly_reg
+  p_butterfly_reg : process (clk)
+  begin -- process p_butterfly_reg
     if rising_edge(clk) then  -- rising clock edge
       if(s_state = st_init) then
 	s_out_y1 <= (others => '0');
@@ -262,7 +267,9 @@ begin  -- archs_fft
 	s_out_u1 <= (others => '0');
 	s_out_u2 <= (others => '0');
       else
-	case s_datastate is
+	s_datastate_n1 <= s_datastate;
+	case s_datastate_n1 is
+--	case s_datastate is
 	  when st_data_u2 =>
 	  -- save sum of the butterfly
 	    s_out_y1 <= s_result1_shift;
@@ -275,58 +282,59 @@ begin  -- archs_fft
 	end case;
       end if;
     end if;
-  end process butterfly_reg;
-  p_butterfly : process (s_datastate, s_data_y1, s_data_y2, s_data_u1, s_data_u2,
-    s_omega1, s_omega2)
+  end process p_butterfly_reg;
+  p_butterfly : process (clk)
   begin -- process p_butterfly
-    case s_datastate is
+    if rising_edge(clk) then  -- rising clock edge
+      case s_datastate is
       -- perform complex multiplication (step 1)
-      when st_data_y1 =>
-	s_dsp_bus.mul_in_a1 <= s_data_u1;
-	s_dsp_bus.mul_in_a2 <= s_data_u2;
-	s_dsp_bus.mul_in_b1 <= std_logic_vector(s_omega1);
-	s_dsp_bus.mul_in_b2 <= std_logic_vector(s_omega2);
-	s_dsp_bus.alu_select <= alu_cmul;
-	s_dsp_bus.acc_mode1 <= acc_store;
-	s_dsp_bus.acc_mode2 <= acc_store;
+	when st_data_y1 =>
+	  s_dsp_bus.mul_in_a1 <= s_data_u1;
+	  s_dsp_bus.mul_in_a2 <= s_data_u2;
+	  s_dsp_bus.mul_in_b1 <= std_logic_vector(s_omega1);
+	  s_dsp_bus.mul_in_b2 <= std_logic_vector(s_omega2);
+	  s_dsp_bus.alu_select <= alu_cmul;
+	  s_dsp_bus.acc_mode1 <= acc_store;
+	  s_dsp_bus.acc_mode2 <= acc_store;
       -- perform complex multiplication (step 2)
-      when st_data_y2 =>
-	s_dsp_bus.mul_in_a1 <= s_data_u1;
-	s_dsp_bus.mul_in_a2 <= s_data_u2;
-	s_dsp_bus.mul_in_b1 <= std_logic_vector(s_omega1);
-	s_dsp_bus.mul_in_b2 <= std_logic_vector(s_omega2);
-	s_dsp_bus.alu_select <= alu_cmul;
-	s_dsp_bus.acc_mode1 <= acc_store;
-	s_dsp_bus.acc_mode2 <= acc_store;
+	when st_data_y2 =>
+	  s_dsp_bus.mul_in_a1 <= s_data_u1;
+	  s_dsp_bus.mul_in_a2 <= s_data_u2;
+	  s_dsp_bus.mul_in_b1 <= std_logic_vector(s_omega1);
+	  s_dsp_bus.mul_in_b2 <= std_logic_vector(s_omega2);
+	  s_dsp_bus.alu_select <= alu_cmul;
+	  s_dsp_bus.acc_mode1 <= acc_store;
+	  s_dsp_bus.acc_mode2 <= acc_store;
       -- sum of the butterfly
-      when st_data_u1 =>
-	s_dsp_bus.mul_in_a1 <= s_data_y1;
-	s_dsp_bus.mul_in_a2 <= s_data_y2;
+	when st_data_u1 =>
+	  s_dsp_bus.mul_in_a1 <= s_data_y1;
+	  s_dsp_bus.mul_in_a2 <= s_data_y2;
 --	s_dsp_bus.mul_in_b1 <= std_logic_vector(to_signed(1, sig_width));
---	s_dsp_bus.mul_in_b2 <= std_logic_vector(to_signed(1, sig_width));
-	s_dsp_bus.mul_in_b1 <= sig_cst_init(-0.99999);
-	s_dsp_bus.mul_in_b2 <= sig_cst_init(-0.99999);
-	s_dsp_bus.alu_select <= alu_mul;
-	s_dsp_bus.acc_mode1 <= acc_sub;
-	s_dsp_bus.acc_mode2 <= acc_sub;
+ --	s_dsp_bus.mul_in_b2 <= std_logic_vector(to_signed(1, sig_width));
+	  s_dsp_bus.mul_in_b1 <= sig_cst_init(-0.99999);
+	  s_dsp_bus.mul_in_b2 <= sig_cst_init(-0.99999);
+	  s_dsp_bus.alu_select <= alu_mul;
+	  s_dsp_bus.acc_mode1 <= acc_sub;
+	  s_dsp_bus.acc_mode2 <= acc_sub;
       -- substraction of the butterfly
-      when st_data_u2 =>
-	s_dsp_bus.mul_in_a1 <= s_data_y1;
-	s_dsp_bus.mul_in_a2 <= s_data_y2;
-	s_dsp_bus.mul_in_b1 <= sig_cst_init(-0.99999);
-	s_dsp_bus.mul_in_b2 <= sig_cst_init(-0.99999);
-	s_dsp_bus.alu_select <= alu_mul;
-	s_dsp_bus.acc_mode1 <= acc_minback_sub;
-	s_dsp_bus.acc_mode2 <= acc_minback_sub;
-      when others =>
-	s_dsp_bus.mul_in_a1 <= (others => '0');
-	s_dsp_bus.mul_in_a2 <= (others => '0');
-	s_dsp_bus.mul_in_b1 <= (others => '0');
-	s_dsp_bus.mul_in_b2 <= (others => '0');
-	s_dsp_bus.alu_select <= alu_mul;
-	s_dsp_bus.acc_mode1 <= acc_store;
-	s_dsp_bus.acc_mode2 <= acc_store;
-    end case;
+	when st_data_u2 =>
+	  s_dsp_bus.mul_in_a1 <= s_data_y1;
+	  s_dsp_bus.mul_in_a2 <= s_data_y2;
+	  s_dsp_bus.mul_in_b1 <= sig_cst_init(-0.99999);
+	  s_dsp_bus.mul_in_b2 <= sig_cst_init(-0.99999);
+	  s_dsp_bus.alu_select <= alu_mul;
+	  s_dsp_bus.acc_mode1 <= acc_minback_sub;
+	  s_dsp_bus.acc_mode2 <= acc_minback_sub;
+	when others =>
+	  s_dsp_bus.mul_in_a1 <= (others => '0');
+	  s_dsp_bus.mul_in_a2 <= (others => '0');
+	  s_dsp_bus.mul_in_b1 <= (others => '0');
+	  s_dsp_bus.mul_in_b2 <= (others => '0');
+	  s_dsp_bus.alu_select <= alu_mul;
+	  s_dsp_bus.acc_mode1 <= acc_store;
+	  s_dsp_bus.acc_mode2 <= acc_store;
+      end case;
+    end if;
   end process p_butterfly;
   -------------------------------------------------------------------------------
   -- Compute address of reading words according to Cooley-Tukey
@@ -349,8 +357,8 @@ begin  -- archs_fft
 	-- init shift ctrl
 	s_shift_flags_reg <= shift_flags_reg;
       else
-	-- the real datastate is shifted of 2 stages because of pipeline delay
-	if (s_datastate = st_data_u1) then
+	-- the real datastate is shifted of 3 stages because of pipeline delay
+	if (s_datastate = st_data_y2) then
 	  -- y1 being read, compute index of y2
 	  s_butter_offset <= to_unsigned(0, c_ind_width);
 	  s_imag_part <= '1';
@@ -362,14 +370,14 @@ begin  -- archs_fft
 	  end if;
 
 	  -- s_angle_offset <= to_unsigned((2**(angle_width - 2)), angle_width);
-	elsif (s_datastate = st_data_u2) then
+	elsif (s_datastate = st_data_u1) then
 	  -- y2 being read, compute index of u1
 	  s_butter_offset <= s_radix_half;
 	  s_imag_part <= '0';
 	  -- angle + pi/2 to get cosinus
 	  s_angle_offset <= to_unsigned((2**(angle_width - 2)), angle_width);
 	  -- s_angle_offset <= to_unsigned(0, angle_width);
-	elsif (s_datastate = st_data_y1) then
+	elsif (s_datastate = st_data_u2) then
 	  -- u1 being read, compute index of u2
 	  s_butter_offset <= s_radix_half;
 	  s_imag_part <= '1';
@@ -406,6 +414,8 @@ begin  -- archs_fft
 	  s_shift_flags_reg <= '0' & s_shift_flags_reg((cmdreg_width - 1) downto 1);
         end if;
       end if;
+      -- Insert one pipe stage to trigo to sync with data from memory m0
+      s_angle_total <= std_logic_vector(s_angle + s_angle_offset);
     end if;
   end process p_addr_comput;
   s_next_index <= s_butter_index + 1;
@@ -416,13 +426,12 @@ begin  -- archs_fft
   p_addr_pipe : process (clk)
   begin -- process p_addr_pipe
     if rising_edge(clk) then  -- rising clock edge
-      s_addr_pipe(0) <= s_dsp_bus.addr_r_m0;
+      s_addr_pipe(0) <= s_addr_r_m0_tmp; -- s_dsp_bus.addr_r_m0;
       if(s_state = st_performft) then
 	  s_wr_pipe(0) <= not s_end_ft;
       else
 	  s_wr_pipe(0) <= '0';
       end if;
---      s_wr_pipe(0) <= s_wr_pipe_in;
       for i in 0 to c_addr_pipe_depth - 2 loop
 	s_addr_pipe(i + 1) <= s_addr_pipe(i);
 	s_wr_pipe(i + 1) <= s_wr_pipe(i);
@@ -494,7 +503,13 @@ begin  -- archs_fft
 
   s_addr_r_m0_tmp(0) <= s_imag_part;
 
-  s_dsp_bus.addr_r_m0 <= s_addr_r_m0_tmp;
+  p_addr_delay : process (clk)
+  begin -- process p_shift_pipe
+    if rising_edge(clk) then  -- rising clock edge
+      s_dsp_bus.addr_r_m0 <= s_addr_r_m0_tmp;
+    end if;
+  end process;
+
   s_dsp_bus.addr_w_m0 <= s_addr_pipe(c_addr_pipe_depth - 1);
   s_dsp_bus.wr_en_m0 <= s_wr_pipe(c_addr_pipe_depth - 1);
 
@@ -505,10 +520,9 @@ begin  -- archs_fft
   s_radix_half	    <= '0' & s_radix_count((c_ind_width - 1) downto 1);
 
   -- trigonometry
-  s_dsp_bus.lut_in((angle_width - 1) downto 0) <= std_logic_vector(s_angle + s_angle_offset);
+  s_dsp_bus.lut_in((angle_width - 1) downto 0) <= s_angle_total;
   s_dsp_bus.lut_in((lut_in_width - 1) downto angle_width) <= (others => '0');
   s_dsp_bus.lut_select <= lutsel_cos;
-  -- s_dsp_bus.lut_select <= ;
   -- shift control
   s_result1_shift <= result1((sig_width - 1) downto 0) when s_shift_pipe(c_shiftflag_pipe_depth - 1) = '0'
 		     else result1(sig_width downto 1);

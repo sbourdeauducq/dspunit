@@ -47,7 +47,7 @@ architecture archi_dotcmul of dotcmul is
   -----------------------------------------------------------------------------
   -- @constants definition
   -----------------------------------------------------------------------------
-    constant c_addr_pipe_depth         : integer := 9;
+    constant c_addr_pipe_depth         : integer := 10;
     constant c_ind_width               : integer := cmdreg_width - 2;
   --=--------------------------------------------------------------------------
   --
@@ -132,7 +132,6 @@ begin  -- archs_dotcmul
 	  when st_performop =>
 	    -- In this state : reading, complex multiplication and writting
 	      -- are done concurently
-	    -- if s_radix_half > s_length then
 	    if s_sample_index = s_length then
 	      --s_dsp_bus.wr_en_m1 <= '1';
 	      s_state <= st_copy;
@@ -158,7 +157,8 @@ begin  -- archs_dotcmul
     if rising_edge(clk) then  -- rising clock edge
       if s_state = st_init then
 	  -- initial state is calculated as a function of pipeline depth
-	  s_datastate <= st_data_y1;
+--	  s_datastate <= st_data_y1;
+	  s_datastate <= st_data_y2;
 	  s_dsp_bus.alu_select <= alu_mul;
 	  s_dsp_bus.acc_mode1 <= acc_store;
 	  s_dsp_bus.acc_mode2 <= acc_store;
@@ -224,7 +224,7 @@ begin  -- archs_dotcmul
 	s_imag_part <= '0';
       else
 	-- the real datastate is shifted of 2 stages because of pipeline delay
-	if (s_datastate = st_data_y1) then
+	if (s_datastate = st_data_y2) then
 	  -- y1 being read, compute index of y2
 	  s_imag_part <= '1';
 
@@ -245,7 +245,7 @@ begin  -- archs_dotcmul
   p_addr_pipe : process (clk)
   begin -- process p_addr_pipe
     if rising_edge(clk) then  -- rising clock edge
-      s_addr_pipe(0) <= s_dsp_bus.addr_r_m0;
+      s_addr_pipe(0) <= s_addr_r_m0_tmp;
       if(s_state = st_performop) then
 	  s_wr_pipe(0) <= '1';
       else
@@ -319,12 +319,17 @@ begin  -- archs_dotcmul
   s_addr_r_m0_tmp(0) <= s_imag_part;
   s_addr_r_m1_tmp(0) <= s_imag_part;
 
-  s_dsp_bus.addr_r_m0 <= s_addr_r_m0_tmp;
+  p_addr_delay : process (clk)
+  begin -- process p_addr_pipe
+    if rising_edge(clk) then  -- rising clock edge
+    s_dsp_bus.addr_r_m0 <= s_addr_r_m0_tmp;
 
---  s_dsp_bus.addr_m1 <= s_dsp_bus.addr_r_m0;
---  s_dsp_bus.addr_m1 <= s_addr_r_m1_tmp and (not s_mask_reg);
-  s_dsp_bus.addr_m1 <= unsigned(bitbit_and(std_logic_vector(s_addr_r_m1_tmp),
-		       std_logic_vector(s_mask_reg)));
+    s_dsp_bus.addr_m1 <= unsigned(bitbit_and(std_logic_vector(s_addr_r_m1_tmp),
+		std_logic_vector(s_mask_reg)));
+    end if;
+  end process p_addr_delay;
+
+
   s_dsp_bus.addr_w_m0 <= s_addr_pipe(c_addr_pipe_depth - 1);
   s_dsp_bus.wr_en_m0 <= s_wr_pipe(c_addr_pipe_depth - 1);
 
