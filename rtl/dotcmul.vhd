@@ -58,7 +58,7 @@ architecture archi_dotcmul of dotcmul is
   -- @signals definition
   -----------------------------------------------------------------------------
   signal s_dsp_bus           : t_dsp_bus;
-  type t_dotcmul_state is (st_init, st_startpipe, st_performft, st_copy);
+  type t_dotcmul_state is (st_init, st_startpipe, st_performop, st_copy);
   type t_datastate is (st_data_y1, st_data_y2);
   signal s_state             : t_dotcmul_state;
   signal s_length            : unsigned((cmdreg_width - 1) downto 0);
@@ -127,18 +127,10 @@ begin  -- archs_dotcmul
 	  when st_init =>
 --	    s_count <= 0;
 	    if s_dsp_bus.op_done = '0' then
-	      s_state <= st_performft;
+	      s_state <= st_performop;
 	    end if;
---	  when st_startpipe =>
---	    -- wait 2 stages for preparing reading data
---	    -- note : the result of the first butterfly (4 stages)
---	      -- will not be written in memory (wait 10 stages)
---	    s_count <= s_count + 1;
---	    if(s_count = 1) then
---	      s_state <= st_performft;
---	    end if;
-	  when st_performft =>
-	    -- In this state : reading, computing butterfly and writting
+	  when st_performop =>
+	    -- In this state : reading, complex multiplication and writting
 	      -- are done concurently
 	    -- if s_radix_half > s_length then
 	    if s_sample_index = s_length then
@@ -184,7 +176,7 @@ begin  -- archs_dotcmul
     end if;
   end process p_data;
   -------------------------------------------------------------------------------
-  -- load data (for the next butterfly computation) from memory
+  -- load data from memory
   -------------------------------------------------------------------------------
   p_dataload : process (clk)
   begin -- process p_dataload
@@ -203,7 +195,7 @@ begin  -- archs_dotcmul
     end if;
   end process p_dataload;
   -------------------------------------------------------------------------------
-  -- store data to memory (previous butterfly)
+  -- store data to memory
   -------------------------------------------------------------------------------
   p_datastore : process (clk)
   begin -- process p_datastore
@@ -222,7 +214,7 @@ begin  -- archs_dotcmul
     end if;
   end process p_datastore;
   -------------------------------------------------------------------------------
-  -- Compute address of reading words according to Cooley-Tukey
+  -- Compute address of reading words
   -------------------------------------------------------------------------------
   p_addr_comput : process (clk)
   begin -- process p_addr_comput
@@ -254,7 +246,7 @@ begin  -- archs_dotcmul
   begin -- process p_addr_pipe
     if rising_edge(clk) then  -- rising clock edge
       s_addr_pipe(0) <= s_dsp_bus.addr_r_m0;
-      if(s_state = st_performft) then
+      if(s_state = st_performop) then
 	  s_wr_pipe(0) <= '1';
       else
 	  s_wr_pipe(0) <= '0';
