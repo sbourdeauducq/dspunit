@@ -48,9 +48,9 @@ architecture archi_fft of fft is
   -----------------------------------------------------------------------------
   -- @constants definition
   -----------------------------------------------------------------------------
-    constant c_addr_pipe_depth         : integer := 13;
+    constant c_addr_pipe_depth         : integer := 14;
     constant c_ind_width               : integer := cmdreg_width - 2;
-    constant c_shiftflag_pipe_depth    : integer := 10;
+    constant c_shiftflag_pipe_depth    : integer := 11;
   --=--------------------------------------------------------------------------
   --
   -- @component declarations
@@ -80,6 +80,7 @@ architecture archi_fft of fft is
   signal s_out_u2         : std_logic_vector((sig_width - 1) downto 0);
   signal s_datastate       : t_datastate;
   signal s_datastate_n1       : t_datastate;
+  signal s_datastate_n2       : t_datastate;
   signal s_length     : unsigned((cmdreg_width - 1) downto 0);
   signal s_radix_count     : unsigned((c_ind_width - 1) downto 0);
   signal s_radix_half    : unsigned((c_ind_width - 1) downto 0);
@@ -237,7 +238,7 @@ begin  -- archs_fft
   p_datastore : process (clk)
   begin -- process p_datastore
     if rising_edge(clk) then  -- rising clock edge
-      case s_datastate_n1 is
+      case s_datastate_n2 is
 --      case s_datastate is
         when st_data_y1 =>
 --	  s_dsp_bus.data_out_m0 <= s_out_y1;
@@ -268,7 +269,8 @@ begin  -- archs_fft
 	s_out_u2 <= (others => '0');
       else
 	s_datastate_n1 <= s_datastate;
-	case s_datastate_n1 is
+	s_datastate_n2 <= s_datastate_n1;
+	case s_datastate_n2 is
 --	case s_datastate is
 	  when st_data_u2 =>
 	  -- save sum of the butterfly

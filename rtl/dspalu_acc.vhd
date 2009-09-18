@@ -80,6 +80,8 @@ architecture archi_dspalu_acc of dspalu_acc is
   signal s_cmp_in           : signed((acc_width - 1) downto 0);
   signal s_acc_mode1         : t_acc_mode;
   signal s_acc_mode2         : t_acc_mode;
+  signal s_acc_mode1_n1      : t_acc_mode;
+  signal s_acc_mode2_n1      : t_acc_mode;
   signal s_acc_mode1_inreg   : t_acc_mode;
   signal s_acc_mode2_inreg   : t_acc_mode;
   signal s_cmul_acc_mode1    : t_acc_mode;
@@ -244,13 +246,15 @@ begin  -- archs_dspalu_acc
     end if;
   end process p_sum_reg;
 
-  s_result1 <= s_mul_out1;
-  s_result2 <= s_mul_out2;
   p_mul_reg : process (clk)
   begin -- process p_mul_reg
     if rising_edge(clk) then  -- rising clock edge
-      s_acc_mode1 <= s_acc_mode1_inreg;
-      s_acc_mode2 <= s_acc_mode2_inreg;
+  s_result1 <= s_mul_out1;
+  s_result2 <= s_mul_out2;
+      s_acc_mode1 <= s_acc_mode1_n1;
+      s_acc_mode2 <= s_acc_mode2_n1;
+      s_acc_mode1_n1 <= s_acc_mode1_inreg;
+      s_acc_mode2_n1 <= s_acc_mode2_inreg;
     end if;
   end process p_mul_reg;
   --=---------------------------------------------------------------------------

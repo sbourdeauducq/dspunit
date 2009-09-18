@@ -47,7 +47,7 @@ architecture archi_dotcmul of dotcmul is
   -----------------------------------------------------------------------------
   -- @constants definition
   -----------------------------------------------------------------------------
-    constant c_addr_pipe_depth         : integer := 10;
+    constant c_addr_pipe_depth         : integer := 11;
     constant c_ind_width               : integer := cmdreg_width - 2;
   --=--------------------------------------------------------------------------
   --
@@ -77,6 +77,7 @@ architecture archi_dotcmul of dotcmul is
   signal s_out_u1         : std_logic_vector((sig_width - 1) downto 0);
   signal s_out_u2         : std_logic_vector((sig_width - 1) downto 0);
   signal s_datastate       : t_datastate;
+  signal s_datastate_n1    : t_datastate;
   type t_addr_pipe is array(0 to c_addr_pipe_depth - 1) of unsigned((cmdreg_width - 1) downto 0);
   type t_wr_pipe is array(0 to c_addr_pipe_depth - 1) of std_logic;
   signal s_addr_pipe         : t_addr_pipe;
@@ -200,7 +201,8 @@ begin  -- archs_dotcmul
   p_datastore : process (clk)
   begin -- process p_datastore
     if rising_edge(clk) then  -- rising clock edge
-      case s_datastate is
+      s_datastate_n1 <= s_datastate;
+      case s_datastate_n1 is
         when st_data_y1 =>
 	  -- states y1, y2 inverted for writing because pipe length is odd
 	  s_dsp_bus.data_out_m0 <= s_out_y1;
