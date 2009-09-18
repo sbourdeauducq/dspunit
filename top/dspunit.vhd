@@ -126,24 +126,24 @@ architecture archi_dspunit of dspunit is
       dsp_bus                  : out t_dsp_bus
 	);
   end component;
-  component dotop
-    port (
-      clk                      : in std_logic;
-      op_en                    : in std_logic;
-      alu_result1              : in std_logic_vector((sig_width - 1) downto 0);
-      alu_result_acc1          : in std_logic_vector((acc_width - 1) downto 0);
-      alu_result2              : in std_logic_vector((sig_width - 1) downto 0);
-      alu_result_acc2          : in std_logic_vector((acc_width - 1) downto 0);
-      result_sum          : in std_logic_vector((2*sig_width - 1) downto 0);
-      data_in_m0               : in std_logic_vector((sig_width - 1) downto 0);
-      data_in_m1               : in std_logic_vector((sig_width - 1) downto 0);
-      data_in_m2               : in std_logic_vector((sig_width - 1) downto 0);
-      opcode                   : in std_logic_vector((cmdreg_width -1) downto 0);
-      length_reg               : in std_logic_vector((cmdreg_width -1) downto 0);
-      offset_reg               : in std_logic_vector((cmdreg_width -1) downto 0);
-      dsp_bus                  : out t_dsp_bus
-	);
-  end component;
+--  component dotop
+--    port (
+--      clk                      : in std_logic;
+--      op_en                    : in std_logic;
+--      alu_result1              : in std_logic_vector((sig_width - 1) downto 0);
+--      alu_result_acc1          : in std_logic_vector((acc_width - 1) downto 0);
+--      alu_result2              : in std_logic_vector((sig_width - 1) downto 0);
+--      alu_result_acc2          : in std_logic_vector((acc_width - 1) downto 0);
+--      result_sum          : in std_logic_vector((2*sig_width - 1) downto 0);
+--      data_in_m0               : in std_logic_vector((sig_width - 1) downto 0);
+--      data_in_m1               : in std_logic_vector((sig_width - 1) downto 0);
+--      data_in_m2               : in std_logic_vector((sig_width - 1) downto 0);
+--      opcode                   : in std_logic_vector((cmdreg_width -1) downto 0);
+--      length_reg               : in std_logic_vector((cmdreg_width -1) downto 0);
+--      offset_reg               : in std_logic_vector((cmdreg_width -1) downto 0);
+--      dsp_bus                  : out t_dsp_bus
+--	);
+--  end component;
   component cpmem
     port (
       clk                      : in std_logic;
@@ -248,6 +248,9 @@ architecture archi_dspunit of dspunit is
   signal s_refresh_cmdregs   : std_logic_vector((c_refresh_cmdreg_length - 1) downto 0);
   signal s_run_buf           : std_logic;
   signal s_refresh_cmdregs_in: std_logic;
+  signal s_length0           : std_logic_vector((cmdreg_data_width - 1) downto 0);
+  signal s_length1           : std_logic_vector((cmdreg_data_width - 1) downto 0);
+  signal s_length2           : std_logic_vector((cmdreg_data_width - 1) downto 0);
 begin  -- archs_dspunit
   -----------------------------------------------------------------------------
   --
@@ -299,7 +302,7 @@ begin  -- archs_dspunit
 	  gcount 	=> s_gcount,
 	  data_in_m0 	=> data_in_m0,
 	  data_in_m1 	=> data_in_m1,
-	  length_reg => s_dsp_cmdregs(DSPADDR_LENGTH0),
+	  length_reg => s_length0,--s_dsp_cmdregs(DSPADDR_LENGTH0),
 	  dsp_bus 	=> s_dsp_bus_conv_circ,
 	  test => s_test);
 
@@ -308,32 +311,32 @@ begin  -- archs_dspunit
 	  clk 	=> clk,
 	  op_en 	=> s_op_cpflip_en,
 	  data_in_m2 	=> data_in_m2,
-	  length_reg 	=> s_dsp_cmdregs(DSPADDR_LENGTH0),
+	  length_reg 	=> s_length0,--s_dsp_cmdregs(DSPADDR_LENGTH0),
 	  dsp_bus 	=> s_dsp_bus_cpflip);
 
-  dotop_1 : dotop
-    port map (
-	  clk 	=> clk,
-	  op_en 	=> s_op_dotop_en,
-	  alu_result1 	=> s_alu_result1,
-	  alu_result_acc1 	=> s_alu_result_acc1,
-	  alu_result2 	=> s_alu_result2,
-	  alu_result_acc2 	=> s_alu_result_acc2,
-	  result_sum 	=> s_alu_result_sum,
-	  data_in_m0 	=> data_in_m0,
-	  data_in_m1 	=> data_in_m1,
-	  data_in_m2 	=> data_in_m2,
-	  opcode 	=> s_dsp_cmdregs(DSPADDR_OPCODE),
-	  length_reg 	=> s_dsp_cmdregs(DSPADDR_LENGTH0),
-	  offset_reg 	=> s_dsp_cmdregs(DSPADDR_LENGTH1),
-	  dsp_bus 	=> s_dsp_bus_dotop);
+--  dotop_1 : dotop
+--    port map (
+--	  clk 	=> clk,
+--	  op_en 	=> s_op_dotop_en,
+--	  alu_result1 	=> s_alu_result1,
+--	  alu_result_acc1 	=> s_alu_result_acc1,
+--	  alu_result2 	=> s_alu_result2,
+--	  alu_result_acc2 	=> s_alu_result_acc2,
+--	  result_sum 	=> s_alu_result_sum,
+--	  data_in_m0 	=> data_in_m0,
+--	  data_in_m1 	=> data_in_m1,
+--	  data_in_m2 	=> data_in_m2,
+--	  opcode 	=> s_dsp_cmdregs(DSPADDR_OPCODE),
+--	  length_reg 	=> s_length0,--s_dsp_cmdregs(DSPADDR_LENGTH0),
+--	  offset_reg 	=> s_length1,--s_dsp_cmdregs(DSPADDR_LENGTH1),
+--	  dsp_bus 	=> s_dsp_bus_dotop);
 
   cpmem_1 : cpmem
     port map (
 	  clk 	=> clk,
 	  op_en 	=> s_op_cpmem_en,
 	  data_in_m0 	=> data_in_m0,
-	  length_reg 	=> s_dsp_cmdregs(DSPADDR_LENGTH0),
+	  length_reg 	=> s_length0,--s_dsp_cmdregs(DSPADDR_LENGTH0),
 	  dsp_bus 	=> s_dsp_bus_cpmem);
 
   fft_1 : fft
@@ -342,8 +345,8 @@ begin  -- archs_dspunit
 	  op_en 	=> s_op_fft_en,
 	  data_in_m0 	=> data_in_m0,
 	  data_in_m2 	=> data_in_m2,
-	  length_reg 	=> s_dsp_cmdregs(DSPADDR_LENGTH0),
-	  shift_flags_reg => s_dsp_cmdregs(DSPADDR_LENGTH1),
+	  length_reg 	=> s_length0,--s_dsp_cmdregs(DSPADDR_LENGTH0),
+	  shift_flags_reg => s_length1,--s_dsp_cmdregs(DSPADDR_LENGTH1),
 	  opflag_select => s_opflag_select,
 	  result1       => s_alu_result_acc1((2*sig_width - 1) downto (sig_width - 1)),
 	  result2       => s_alu_result_acc2((2*sig_width - 1) downto (sig_width - 1)),
@@ -356,8 +359,8 @@ begin  -- archs_dspunit
 	  op_en 	=> s_op_dotcmul_en,
 	  data_in_m0 	=> data_in_m0,
 	  data_in_m1 	=> data_in_m1,
-	  length_reg 	=> s_dsp_cmdregs(DSPADDR_LENGTH0),
-	  length_kern_reg 	=> s_dsp_cmdregs(DSPADDR_LENGTH1),
+	  length_reg 	=> s_length0,--s_dsp_cmdregs(DSPADDR_LENGTH0),
+	  length_kern_reg 	=> s_length1,--s_dsp_cmdregs(DSPADDR_LENGTH1),
 	  opflag_select => s_opflag_select,
 --	  result1 	=> s_alu_result_acc1((2*sig_width - 2) downto (sig_width - 1)),
 --	  result2 	=> s_alu_result_acc2((2*sig_width - 2) downto (sig_width - 1)),
@@ -370,8 +373,8 @@ begin  -- archs_dspunit
 	  clk 	=> clk,
 	  op_en 	=> s_op_sigshift_en,
 	  data_in_m0 	=> data_in_m0,
-	  length_reg 	=> s_dsp_cmdregs(DSPADDR_LENGTH0),
-	  shift_reg 	=> s_dsp_cmdregs(DSPADDR_LENGTH1),
+	  length_reg 	=> s_length0,
+	  shift_reg 	=> s_length1,
 	  opflag_select => s_opflag_select,
 	  dsp_bus 	=> s_dsp_bus_sigshift);
 
@@ -428,6 +431,7 @@ begin  -- archs_dspunit
       end loop;
     end if;
   end process p_cmdreg_buf;
+  debug <= s_dsp_cmdregs(DSPADDR_SR);
   s_run_buf <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);
   s_refresh_cmdregs_in <= (not s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_RUN)) and s_run_buf;
   -------------------------------------------------------------------------------
@@ -451,8 +455,23 @@ begin  -- archs_dspunit
     if rising_edge(clk) then  -- rising clock edge
       s_runop_sync <= s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_RUN);
       s_runop <= s_runop_sync;
+      -- cmdregs can be considered as stable when s_runop='1'
+      if s_runop = '1' then
+	s_opcode_select_inreg <= s_dsp_cmdregs(DSPADDR_OPCODE)((opcode_width - 1) downto 0);
+	s_opflag_select_inreg <= s_dsp_cmdregs(DSPADDR_OPCODE)((opflag_width + opcode_width - 1) downto (opcode_width));
+      else
+	s_opcode_select_inreg <= (others => '0');
+	s_opflag_select_inreg <= (others => '0');
+      end if;
+
       s_opcode_select <= s_opcode_select_inreg;
       s_opflag_select <= s_opflag_select_inreg;
+      s_offset_0         <= unsigned(s_dsp_cmdregs(DSPADDR_STARTADDR0));
+      s_offset_1         <= unsigned(s_dsp_cmdregs(DSPADDR_STARTADDR1));
+      s_offset_2         <= unsigned(s_dsp_cmdregs(DSPADDR_STARTADDR2));
+      s_length0           <= s_dsp_cmdregs(DSPADDR_LENGTH0);
+      s_length1           <= s_dsp_cmdregs(DSPADDR_LENGTH1);
+      s_length2           <= s_dsp_cmdregs(DSPADDR_LENGTH2);
     end if;
   end process p_synccmd;
   --=---------------------------------------------------------------------------
@@ -466,8 +485,6 @@ begin  -- archs_dspunit
   -------------------------------------------------------------------------------
   -- multiplexer of the dsp unit bus
   -------------------------------------------------------------------------------
-  s_opcode_select_inreg <= s_dsp_cmdregs(DSPADDR_OPCODE)((opcode_width - 1) downto 0) when s_runop = '1' else (others => '0');
-  s_opflag_select_inreg <= s_dsp_cmdregs(DSPADDR_OPCODE)((opflag_width + opcode_width - 1) downto (opcode_width));
   s_op_conv_circ_en <= '1' when s_opcode_select = opcode_conv_circ else '0';
   s_op_cpflip_en <= '1' when s_opcode_select = opcode_cpflip else '0';
   s_op_dotop_en <= '1' when s_opcode_select = opcode_dotop else '0';
@@ -510,9 +527,6 @@ begin  -- archs_dspunit
 
   op_done                     <= s_dsp_bus.op_done;
 
-  s_offset_0         <= unsigned(s_dsp_cmdregs(DSPADDR_STARTADDR0));
-  s_offset_1         <= unsigned(s_dsp_cmdregs(DSPADDR_STARTADDR1));
-  s_offset_2         <= unsigned(s_dsp_cmdregs(DSPADDR_STARTADDR2));
   s_clr_acc          <= not reset;
 end archi_dspunit;
 -------------------------------------------------------------------------------

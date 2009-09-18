@@ -44,7 +44,7 @@ architecture archi_sigshift of sigshift is
   -----------------------------------------------------------------------------
   -- @constants definition
   -----------------------------------------------------------------------------
-    constant c_addr_pipe_depth         : integer := 2;
+    constant c_addr_pipe_depth         : integer := 3;
     constant c_data_pipe_depth         : integer := 6;
     constant c_ind_width               : integer := cmdreg_width - 2;
   --=--------------------------------------------------------------------------
@@ -175,7 +175,13 @@ begin  -- archs_sigshift
   s_data_bis <= s_data_pipe(c_data_pipe_depth - 1)(sig_width - 1) & s_data_pipe(c_data_pipe_depth - 1)((sig_width - 1) downto 1);
   s_dsp_bus.data_out_m0 <= std_logic_vector(signed(data_in_m0) + signed(s_data_bis));
   -- Writing and reading address of the memory
-  s_dsp_bus.addr_r_m0 <= s_addr_r_m0_tmp and s_length_moins;
+  process (clk)
+  begin -- process
+    if rising_edge(clk) then  -- rising clock edge
+      -- One register just after address computation
+      s_dsp_bus.addr_r_m0 <= s_addr_r_m0_tmp and s_length_moins;
+    end if;
+  end process;
 --  s_dsp_bus.addr_w_m0 <= (s_addr_pipe(c_addr_pipe_depth - 1) + s_shift) and s_length_moins;
   s_dsp_bus.addr_w_m0 <= s_addr_pipe(c_addr_pipe_depth - 1) + s_length;
 --  s_dsp_bus.addr_w_m0 <= s_addr_pipe(0) + s_length;
