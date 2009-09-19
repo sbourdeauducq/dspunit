@@ -28,13 +28,13 @@ use work.dspalu_pac.all;
 entity cpflip is
   port (
     --@inputs
-    clk                      : in std_logic;
-    op_en                    : in std_logic;
-    data_in_m2               : in std_logic_vector((sig_width - 1) downto 0);
-    length_reg               : in std_logic_vector((cmdreg_data_width -1) downto 0);
+    clk        : in  std_logic;
+    op_en      : in  std_logic;
+    data_in_m2 : in  std_logic_vector((sig_width - 1) downto 0);
+    length_reg : in  std_logic_vector((cmdreg_data_width -1) downto 0);
     --@outputs;
-    dsp_bus                  : out t_dsp_bus
-);
+    dsp_bus    : out t_dsp_bus
+    );
 end cpflip;
 --=----------------------------------------------------------------------------
 architecture archi_cpflip of cpflip is
@@ -49,10 +49,10 @@ architecture archi_cpflip of cpflip is
   --=--------------------------------------------------------------------------
   -- @signals definition
   -----------------------------------------------------------------------------
-  signal s_dsp_bus           : t_dsp_bus;
-  type t_cpflip_state is (st_init, st_startpipe, st_copy);
-  signal s_state             : t_cpflip_state;
-  signal s_length            : unsigned((cmdreg_width - 1) downto 0);
+  signal s_dsp_bus : t_dsp_bus;
+  type   t_cpflip_state is (st_init, st_startpipe, st_copy);
+  signal s_state   : t_cpflip_state;
+  signal s_length  : unsigned((cmdreg_width - 1) downto 0);
 begin  -- archs_cpflip
   -----------------------------------------------------------------------------
   --
@@ -61,68 +61,68 @@ begin  -- archs_cpflip
   -----------------------------------------------------------------------------
   --=---------------------------------------------------------------------------
   p_cpflip : process (clk)
-  begin -- process p_cpflip
-    if rising_edge(clk) then  -- rising clock edge
+  begin  -- process p_cpflip
+    if rising_edge(clk) then            -- rising clock edge
       if op_en = '0' then
-        s_state <= st_init;
-	--s_dsp_bus <= c_dsp_bus_init;
-        s_dsp_bus.op_done		   <= '0';
+        s_state              <= st_init;
+        --s_dsp_bus <= c_dsp_bus_init;
+        s_dsp_bus.op_done    <= '0';
         -- memory 0
 --        s_dsp_bus.data_out_m0          <= (others => '0');
-        s_dsp_bus.addr_r_m0            <= (others => '0');
-        s_dsp_bus.addr_w_m0            <= (others => '0');
-        s_dsp_bus.wr_en_m0             <= '0';
+        s_dsp_bus.addr_r_m0  <= (others => '0');
+        s_dsp_bus.addr_w_m0  <= (others => '0');
+        s_dsp_bus.wr_en_m0   <= '0';
         --s_dsp_bus.c_en_m0              <= '0';
         -- memory 1
 --        s_dsp_bus.data_out_m1          <= (others => '0');
-        s_dsp_bus.addr_m1              <= (others => '0');
-        s_dsp_bus.wr_en_m1             <= '0';
+        s_dsp_bus.addr_m1    <= (others => '0');
+        s_dsp_bus.wr_en_m1   <= '0';
         --s_dsp_bus.c_en_m1              <= '0';
         -- memory 2
 --        s_dsp_bus.data_out_m2          <= (others => '0');
-        s_dsp_bus.addr_m2              <= (others => '0');
-        s_dsp_bus.wr_en_m2             <= '0';
+        s_dsp_bus.addr_m2    <= (others => '0');
+        s_dsp_bus.wr_en_m2   <= '0';
         --s_dsp_bus.c_en_m2              <= '0';
         -- alu
-        --s_dsp_bus.mul_in_a1		   <= (others <= '0');
-        --s_dsp_bus.mul_in_b1		   <= (others <= '0');
-        --s_dsp_bus.mul_in_a2		   <= (others <= '0');
-        --s_dsp_bus.mul_in_b2		   <= (others <= '0');
-        s_dsp_bus.acc_mode1            <= acc_store;
-        s_dsp_bus.acc_mode2            <= acc_store;
-        s_dsp_bus.alu_select           <= alu_mul;
+        --s_dsp_bus.mul_in_a1              <= (others <= '0');
+        --s_dsp_bus.mul_in_b1              <= (others <= '0');
+        --s_dsp_bus.mul_in_a2              <= (others <= '0');
+        --s_dsp_bus.mul_in_b2              <= (others <= '0');
+        s_dsp_bus.acc_mode1  <= acc_store;
+        s_dsp_bus.acc_mode2  <= acc_store;
+        s_dsp_bus.alu_select <= alu_mul;
         -- global counter
         --s_dsp_bus.gcounter_reset       <= '0';
-      -------------------------------------------------------------------------------
-      -- operation management
-      -------------------------------------------------------------------------------
+        -------------------------------------------------------------------------------
+        -- operation management
+        -------------------------------------------------------------------------------
       else
         case s_state is
-	  when st_init =>
-	    s_dsp_bus.addr_m1 <= s_length;
-	    s_dsp_bus.addr_m2 <= (others => '0');
-            s_dsp_bus.wr_en_m1             <= '0';
-	    if s_dsp_bus.op_done = '0' then
-	      s_state <= st_startpipe;
-	    end if;
-	  when st_startpipe =>
-	    if s_dsp_bus.addr_m2 = 1 then
-	      s_dsp_bus.wr_en_m1 <= '1';
-	      s_state <= st_copy;
-	    end if;
-	    -- index increment
-	    s_dsp_bus.addr_m2 <= s_dsp_bus.addr_m2 + 1;
-	  when st_copy =>
-	    s_dsp_bus.wr_en_m1 <= '1';
-	    if(s_dsp_bus.addr_m1 = 0) then
-	      s_state <= st_init;
-	      s_dsp_bus.op_done <= '1';
-	    else
-	      s_dsp_bus.addr_m2 <= s_dsp_bus.addr_m2 + 1;
-	      s_dsp_bus.addr_m1 <= (s_dsp_bus.addr_m1 - 1) and s_length;
-	    end if;
-	  when others => null;
-	end case;
+          when st_init =>
+            s_dsp_bus.addr_m1  <= s_length;
+            s_dsp_bus.addr_m2  <= (others => '0');
+            s_dsp_bus.wr_en_m1 <= '0';
+            if s_dsp_bus.op_done = '0' then
+              s_state <= st_startpipe;
+            end if;
+          when st_startpipe =>
+            if s_dsp_bus.addr_m2 = 1 then
+              s_dsp_bus.wr_en_m1 <= '1';
+              s_state            <= st_copy;
+            end if;
+            -- index increment
+            s_dsp_bus.addr_m2 <= s_dsp_bus.addr_m2 + 1;
+          when st_copy =>
+            s_dsp_bus.wr_en_m1 <= '1';
+            if(s_dsp_bus.addr_m1 = 0) then
+              s_state           <= st_init;
+              s_dsp_bus.op_done <= '1';
+            else
+              s_dsp_bus.addr_m2 <= s_dsp_bus.addr_m2 + 1;
+              s_dsp_bus.addr_m1 <= (s_dsp_bus.addr_m1 - 1) and s_length;
+            end if;
+          when others => null;
+        end case;
       end if;
     end if;
   end process p_cpflip;
@@ -131,14 +131,14 @@ begin  -- archs_cpflip
   -- @concurrent signal assignments
   --
   -----------------------------------------------------------------------------
-  dsp_bus           <= s_dsp_bus;
-  s_dsp_bus.data_out_m2         <= (others => '0');
-  s_dsp_bus.data_out_m0         <= (others => '0');
-  s_dsp_bus.data_out_m1         <= data_in_m2;
-  s_dsp_bus.c_en_m0         <= '0';
-  s_dsp_bus.c_en_m1         <= '1';
-  s_dsp_bus.c_en_m2         <= '1';
-  s_dsp_bus.gcounter_reset  <= '1';
-  s_length          <= unsigned(length_reg);
- end archi_cpflip;
+  dsp_bus                  <= s_dsp_bus;
+  s_dsp_bus.data_out_m2    <= (others => '0');
+  s_dsp_bus.data_out_m0    <= (others => '0');
+  s_dsp_bus.data_out_m1    <= data_in_m2;
+  s_dsp_bus.c_en_m0        <= '0';
+  s_dsp_bus.c_en_m1        <= '1';
+  s_dsp_bus.c_en_m2        <= '1';
+  s_dsp_bus.gcounter_reset <= '1';
+  s_length                 <= unsigned(length_reg);
+end archi_cpflip;
 

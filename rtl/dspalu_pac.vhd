@@ -26,54 +26,54 @@ use ieee.numeric_std.all;
 
 package dspalu_pac is
 
-function zeros(size : natural) return unsigned;
-function zeros(size : natural) return std_logic_vector;
-function sig_one(size : natural) return signed;
-function sig_one(size : natural) return std_logic_vector;
+  function zeros(size   : natural) return unsigned;
+  function zeros(size   : natural) return std_logic_vector;
+  function sig_one(size : natural) return signed;
+  function sig_one(size : natural) return std_logic_vector;
 
-type t_acc_mode is (acc_store, acc_sumstore, acc_diff, acc_add, acc_sub, acc_back_add, acc_minback_add, acc_minback_sub);
-type t_alu_select is (alu_add, alu_muladd, alu_mul, alu_cmul, alu_cmul_conj);
-type t_cmp_mode is (cmp_acc1, cmp_acc2);
+  type t_acc_mode is (acc_store, acc_sumstore, acc_diff, acc_add, acc_sub, acc_back_add, acc_minback_add, acc_minback_sub);
+  type t_alu_select is (alu_add, alu_muladd, alu_mul, alu_cmul, alu_cmul_conj);
+  type t_cmp_mode is (cmp_acc1, cmp_acc2);
 
 end dspalu_pac;
 
 package body dspalu_pac is
 
-function zeros(size : natural) return unsigned
-is
-  variable vect_zeros : unsigned((size - 1) downto 0);
-begin
-  vect_zeros := (others => '0');
-  return vect_zeros;
-end zeros;
+  function zeros(size : natural) return unsigned
+  is
+    variable vect_zeros : unsigned((size - 1) downto 0);
+  begin
+    vect_zeros := (others => '0');
+    return vect_zeros;
+  end zeros;
 
-function zeros(size : natural) return std_logic_vector
-is
-  variable vect_zeros : std_logic_vector((size - 1) downto 0);
-begin
-  vect_zeros := (others => '0');
-  return vect_zeros;
-end zeros;
+  function zeros(size : natural) return std_logic_vector
+  is
+    variable vect_zeros : std_logic_vector((size - 1) downto 0);
+  begin
+    vect_zeros := (others => '0');
+    return vect_zeros;
+  end zeros;
 
-function sig_one(size : natural) return signed
-is
-  variable vect_one : signed((size - 1) downto 0);
-begin
-  vect_one(size - 1) := '0';
-  vect_one((size - 2) downto 0) := (others => '1');
+  function sig_one(size : natural) return signed
+  is
+    variable vect_one : signed((size - 1) downto 0);
+  begin
+    vect_one(size - 1)            := '0';
+    vect_one((size - 2) downto 0) := (others => '1');
 
-  return vect_one;
-end sig_one;
+    return vect_one;
+  end sig_one;
 
-function sig_one(size : natural) return std_logic_vector
-is
-  variable vect_one : std_logic_vector((size - 1) downto 0);
-begin
-  vect_one(size - 1) := '0';
-  vect_one((size - 2) downto 0) := (others => '1');
+  function sig_one(size : natural) return std_logic_vector
+  is
+    variable vect_one : std_logic_vector((size - 1) downto 0);
+  begin
+    vect_one(size - 1)            := '0';
+    vect_one((size - 2) downto 0) := (others => '1');
 
-  return vect_one;
-end sig_one;
+    return vect_one;
+  end sig_one;
 
 
 end dspalu_pac;
