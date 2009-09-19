@@ -101,6 +101,27 @@ architecture archi_dspunit of dspunit is
       cmp_out     : out std_logic
       );
   end component;
+  component dsp_cmdregs
+    port (
+      clk             : in  std_logic;
+      clk_cpu         : in  std_logic;
+      reset           : in  std_logic;
+      op_done         : in  std_logic;
+      addr_cmdreg     : in  std_logic_vector((cmdreg_addr_width - 1) downto 0);
+      data_in_cmdreg  : in  std_logic_vector((cmdreg_data_width - 1) downto 0);
+      wr_en_cmdreg    : in  std_logic;
+      data_out_cmdreg : out std_logic_vector((cmdreg_data_width - 1) downto 0);
+      offset_0        : out unsigned((cmdreg_width - 1) downto 0);
+      offset_1        : out unsigned((cmdreg_width - 1) downto 0);
+      offset_2        : out unsigned((cmdreg_width - 1) downto 0);
+      length0         : out std_logic_vector((cmdreg_data_width - 1) downto 0);
+      length1         : out std_logic_vector((cmdreg_data_width - 1) downto 0);
+      length2         : out std_logic_vector((cmdreg_data_width - 1) downto 0);
+      opflag_select   : out std_logic_vector((opflag_width - 1) downto 0);
+      opcode_select   : out std_logic_vector((opcode_width - 1) downto 0);
+      debug           : out std_logic_vector(15 downto 0)
+      );
+  end component;
   component conv_circ
     port (
       clk             : in  std_logic;
@@ -204,25 +225,24 @@ architecture archi_dspunit of dspunit is
   --=--------------------------------------------------------------------------
   -- @signals definition
   -----------------------------------------------------------------------------
-  signal s_dsp_cmdregs         : t_dsp_cmdregs;
-  signal s_dsp_cmdregs_buf     : t_dsp_cmdregs;
   signal s_clr_acc             : std_logic;
   signal s_alu_result1         : std_logic_vector((sig_width - 1) downto 0);
   signal s_alu_result_acc1     : std_logic_vector((acc_width - 1) downto 0);
   signal s_alu_result2         : std_logic_vector((sig_width - 1) downto 0);
   signal s_alu_result_acc2     : std_logic_vector((acc_width - 1) downto 0);
   signal s_alu_result_sum      : std_logic_vector((2 * sig_width - 1) downto 0);
-  signal s_gcount              : unsigned(15 downto 0);
-  signal s_dsp_bus             : t_dsp_bus;
-  signal s_dsp_bus_conv_circ   : t_dsp_bus;
   signal s_op_conv_circ_en     : std_logic;
-  signal s_opflag_select_inreg : std_logic_vector((opflag_width - 1) downto 0);
   signal s_opflag_select       : std_logic_vector((opflag_width - 1) downto 0);
-  signal s_opcode_select_inreg : std_logic_vector((opcode_width - 1) downto 0);
   signal s_opcode_select       : std_logic_vector((opcode_width - 1) downto 0);
   signal s_offset_0            : unsigned((cmdreg_width - 1) downto 0);
   signal s_offset_1            : unsigned((cmdreg_width - 1) downto 0);
   signal s_offset_2            : unsigned((cmdreg_width - 1) downto 0);
+  signal s_length0             : std_logic_vector((cmdreg_data_width - 1) downto 0);
+  signal s_length1             : std_logic_vector((cmdreg_data_width - 1) downto 0);
+  signal s_length2             : std_logic_vector((cmdreg_data_width - 1) downto 0);
+  signal s_gcount              : unsigned(15 downto 0);
+  signal s_dsp_bus             : t_dsp_bus;
+  signal s_dsp_bus_conv_circ   : t_dsp_bus;
   signal s_test                : std_logic_vector(15 downto 0);
   signal s_op_cpflip_en        : std_logic;
   signal s_dsp_bus_cpflip      : t_dsp_bus;
@@ -234,10 +254,6 @@ architecture archi_dspunit of dspunit is
   signal s_op_dotcmul_en       : std_logic;
   signal s_dsp_bus_fft         : t_dsp_bus;
   signal s_dsp_bus_dotcmul     : t_dsp_bus;
-  signal s_runop               : std_logic;
-  signal s_runop_sync          : std_logic;
-  signal s_op_done_sync        : std_logic;
-  signal s_op_done_resync      : std_logic;
   signal s_lut_out             : std_logic_vector((lut_out_width - 1) downto 0);
   signal s_alu_cmp_reg         : std_logic_vector((acc_width - 1) downto 0);
   signal s_alu_cmp_out         : std_logic;
@@ -245,12 +261,6 @@ architecture archi_dspunit of dspunit is
   signal s_dsp_bus_sigshift    : t_dsp_bus;
   signal s_op_sigshift_en      : std_logic;
   signal s_chain_acc           : std_logic;
-  signal s_refresh_cmdregs     : std_logic_vector((c_refresh_cmdreg_length - 1) downto 0);
-  signal s_run_buf             : std_logic;
-  signal s_refresh_cmdregs_in  : std_logic;
-  signal s_length0             : std_logic_vector((cmdreg_data_width - 1) downto 0);
-  signal s_length1             : std_logic_vector((cmdreg_data_width - 1) downto 0);
-  signal s_length2             : std_logic_vector((cmdreg_data_width - 1) downto 0);
 begin  -- archs_dspunit
   -----------------------------------------------------------------------------
   --
@@ -283,6 +293,26 @@ begin  -- archs_dspunit
       cmp_reg     => s_alu_cmp_reg,
       cmp_greater => s_cmp_greater,
       cmp_out     => s_alu_cmp_out);
+
+  dsp_cmdregs_1 : dsp_cmdregs
+    port map (
+      clk             => clk,
+      clk_cpu         => clk_cpu,
+      reset           => reset,
+      op_done         => s_dsp_bus.op_done,
+      addr_cmdreg     => addr_cmdreg,
+      data_in_cmdreg  => data_in_cmdreg,
+      wr_en_cmdreg    => wr_en_cmdreg,
+      data_out_cmdreg => data_out_cmdreg,
+      offset_0        => s_offset_0,
+      offset_1        => s_offset_1,
+      offset_2        => s_offset_2,
+      length0         => s_length0,
+      length1         => s_length1,
+      length2         => s_length2,
+      opflag_select   => s_opflag_select,
+      opcode_select   => s_opcode_select,
+      debug           => open);
 
   dsplut_1 : dsplut
     port map (
@@ -380,61 +410,6 @@ begin  -- archs_dspunit
 
   --=---------------------------------------------------------------------------
   -------------------------------------------------------------------------------
-  -- writing registers of the dspunit
-  -------------------------------------------------------------------------------
-  p_cmdreg : process (clk_cpu, reset)
-  begin  -- process p_cmdreg
-    if reset = '0' then
-      --for i in 0 to (2**cmdreg_addr_width - 1) loop
-      for i in 0 to 15 loop
-        s_dsp_cmdregs(i) <= (others => '0');
-      end loop;
-    elsif rising_edge(clk_cpu) then     -- rising clock edge
---      if(wr_en_cmdreg = '1') then
---        s_dsp_cmdregs(to_integer(unsigned(addr_cmdreg))) <= data_in_cmdreg;
-      if (s_refresh_cmdregs_in and s_refresh_cmdregs(3)) = '1' then
-        for i in 0 to 15 loop
-          s_dsp_cmdregs(i) <= s_dsp_cmdregs_buf(i);
-        end loop;
-      elsif (s_refresh_cmdregs(3) = '0') then
-        if(s_op_done_resync = '1') then
-          s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_OPDONE) <= '1';
---      if(s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_OPDONE) = 1) then
-          s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_RUN)    <= '0';
-        end if;
-        s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_LOADED) <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);
-      end if;
-      data_out_cmdreg  <= s_dsp_cmdregs(to_integer(unsigned(addr_cmdreg)));
-      s_op_done_sync   <= s_dsp_bus.op_done;
-      s_op_done_resync <= s_op_done_sync;
-    end if;
-  end process p_cmdreg;
-  p_cmdreg_buf : process (clk_cpu, reset)
-  begin  -- process p_cmdreg_buf
-    if reset = '0' then
-      --for i in 0 to (2**cmdreg_buf_addr_width - 1) loop
-      for i in 0 to 15 loop
-        s_dsp_cmdregs_buf(i) <= (others => '0');
-      end loop;
-    elsif rising_edge(clk_cpu) then     -- rising clock edge
-      if(wr_en_cmdreg = '1') then
-        s_dsp_cmdregs_buf(to_integer(unsigned(addr_cmdreg))) <= data_in_cmdreg;
-      else
-        if((s_refresh_cmdregs(3) and s_refresh_cmdregs(0)) = '1') then
-          s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN) <= '0';
-        end if;
-      end if;
-      -- Pipeline to generate a delay before refresh cmdregs
-      s_refresh_cmdregs(0) <= s_refresh_cmdregs_in;
-      for i in c_refresh_cmdreg_length - 2 downto 0 loop
-        s_refresh_cmdregs(i + 1) <= s_refresh_cmdregs(i);
-      end loop;
-    end if;
-  end process p_cmdreg_buf;
-  debug                <= s_dsp_cmdregs(DSPADDR_SR);
-  s_run_buf            <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);
-  s_refresh_cmdregs_in <= (not s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_RUN)) and s_run_buf;
-  -------------------------------------------------------------------------------
   -- Global counter
   -------------------------------------------------------------------------------
   p_count : process (clk)
@@ -447,33 +422,6 @@ begin  -- archs_dspunit
       end if;
     end if;
   end process p_count;
-  -------------------------------------------------------------------------------
-  -- Synchronization of command signals to the dspunit clock
-  -------------------------------------------------------------------------------
-  p_synccmd : process (clk)
-  begin  -- process p_synccmd
-    if rising_edge(clk) then            -- rising clock edge
-      s_runop_sync <= s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_RUN);
-      s_runop      <= s_runop_sync;
-      -- cmdregs can be considered as stable when s_runop='1'
-      if s_runop = '1' then
-        s_opcode_select_inreg <= s_dsp_cmdregs(DSPADDR_OPCODE)((opcode_width - 1) downto 0);
-        s_opflag_select_inreg <= s_dsp_cmdregs(DSPADDR_OPCODE)((opflag_width + opcode_width - 1) downto (opcode_width));
-      else
-        s_opcode_select_inreg <= (others => '0');
-        s_opflag_select_inreg <= (others => '0');
-      end if;
-
-      s_opcode_select <= s_opcode_select_inreg;
-      s_opflag_select <= s_opflag_select_inreg;
-      s_offset_0      <= unsigned(s_dsp_cmdregs(DSPADDR_STARTADDR0));
-      s_offset_1      <= unsigned(s_dsp_cmdregs(DSPADDR_STARTADDR1));
-      s_offset_2      <= unsigned(s_dsp_cmdregs(DSPADDR_STARTADDR2));
-      s_length0       <= s_dsp_cmdregs(DSPADDR_LENGTH0);
-      s_length1       <= s_dsp_cmdregs(DSPADDR_LENGTH1);
-      s_length2       <= s_dsp_cmdregs(DSPADDR_LENGTH2);
-    end if;
-  end process p_synccmd;
   --=---------------------------------------------------------------------------
   --
   -- @concurrent signal assignments

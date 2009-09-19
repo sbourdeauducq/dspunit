@@ -1,36 +1,36 @@
 v 3
-file "" "../rtl/fft.vhd" "20090918224756.000" "20090919004802.598":
-  entity fft at 22( 1409) + 0 on 383;
-  architecture archi_fft of fft at 47( 2543) + 0 on 384;
-file / "../rtl/dspalu_acc.vhd" "20090918221318.000" "20090919001757.984":
-  entity dspalu_acc at 22( 1409) + 0 on 379;
-  architecture archi_dspalu_acc of dspalu_acc at 59( 3130) + 0 on 380;
-file / "../rtl/dotcmul.vhd" "20090918210544.000" "20090918230612.911":
-  entity dotcmul at 22( 1409) + 0 on 375;
-  architecture archi_dotcmul of dotcmul at 46( 2482) + 0 on 376;
+file "" "../rtl/dsp_cmdregs.vhd" "20090919220712.000" "20090920002745.604":
+  entity dsp_cmdregs at 22( 1409) + 0 on 409;
+  architecture archi_dsp_cmdregs of dsp_cmdregs at 54( 2841) + 0 on 410;
+file / "../rtl/sigshift.vhd" "20090919114417.000" "20090920002548.086":
+  entity sigshift at 22( 1409) + 0 on 407;
+  architecture archi_sigshift of sigshift at 43( 2182) + 0 on 408;
+file / "../rtl/fft.vhd" "20090919114415.000" "20090920002547.190":
+  entity fft at 22( 1409) + 0 on 403;
+  architecture archi_fft of fft at 47( 2459) + 0 on 404;
+file / "../rtl/cpflip.vhd" "20090919114356.000" "20090920002546.879":
+  entity cpflip at 22( 1409) + 0 on 399;
+  architecture archi_cpflip of cpflip at 40( 1996) + 0 on 400;
+file / "../rtl/dsplut.vhd" "20090919114403.000" "20090920002546.580":
+  entity dsplut at 22( 1409) + 0 on 395;
+  architecture archi_dsplut of dsplut at 40( 2002) + 0 on 396;
+file / "../top/dspunit.vhd" "20090919222542.000" "20090920002545.583":
+  entity dspunit at 22( 1409) + 0 on 391;
+  architecture archi_dspunit of dspunit at 65( 3245) + 0 on 392;
+file / "../rtl/dspunit_pac.vhd" "20090919114404.000" "20090920002545.358":
+  package dspunit_pac at 22( 1409) + 0 on 387 body;
+  package body dspunit_pac at 177( 8271) + 0 on 388;
 file / "rompkg.vhd" "20090914210631.000" "20090918214309.331":
   package rompkg at 47( 1910) + 0 on 368;
 file / "../rtl/bit_manipulation.vhdl" "20090914213721.000" "20090918214307.888":
   package bit_manipulation at 22( 1015) + 0 on 360 body;
   package body bit_manipulation at 82( 3397) + 0 on 361;
-file / "../rtl/cpflip.vhd" "20090914210631.000" "20090918214307.568":
-  entity cpflip at 22( 1409) + 0 on 356;
-  architecture archi_cpflip of cpflip at 40( 2058) + 0 on 357;
-file / "../rtl/dsplut.vhd" "20090914210631.000" "20090918214307.272":
-  entity dsplut at 22( 1409) + 0 on 352;
-  architecture archi_dsplut of dsplut at 40( 2051) + 0 on 353;
 file / "clock_gen.vhd" "20090914210631.000" "20090918214306.926":
   entity clock_gen at 31( 1223) + 0 on 348;
   architecture archi_clock_gen of clock_gen at 47( 1586) + 0 on 349;
 file / "gen_memoryf.vhd" "20090914210631.000" "20090918214306.738":
   entity gen_memoryf at 22( 1409) + 0 on 344;
   architecture archi_gen_memoryf of gen_memoryf at 51( 2546) + 0 on 345;
-file / "bench_dspunit.vhd" "20090916111415.000" "20090918214305.873":
-  entity bench_dspunit at 22( 1409) + 0 on 340;
-  architecture archi_bench_dspunit of bench_dspunit at 31( 1708) + 0 on 341;
-file / "../rtl/dspalu_pac.vhd" "20090914210631.000" "20090918214305.755":
-  package dspalu_pac at 22( 1409) + 0 on 336 body;
-  package body dspalu_pac at 40( 2052) + 0 on 337;
 file / "bench_dspunit8.vhd" "20090914212142.000" "20090915000004.914":
   entity bench_dspunit8 at 22( 1409) + 0 on 4;
   architecture archi_bench_dspunit of bench_dspunit8 at 31( 1710) + 0 on 4;
@@ -52,24 +52,27 @@ file / "romfile.vhd" "20090914210631.000" "20090915000502.375":
 file / "../rtl/dotop.vhd" "20090914210631.000" "20090918105016.879":
   entity dotop at 22( 1409) + 0 on 307;
   architecture archi_dotop of dotop at 49( 2769) + 0 on 308;
-file / "../rtl/dspunit_pac.vhd" "20090914210631.000" "20090918214305.803":
-  package dspunit_pac at 22( 1409) + 0 on 338 body;
-  package body dspunit_pac at 177( 7960) + 0 on 339;
-file / "../top/dspunit.vhd" "20090918091221.000" "20090918214306.009":
-  entity dspunit at 22( 1409) + 0 on 342;
-  architecture archi_dspunit of dspunit at 65( 3464) + 0 on 343;
 file / "gen_memory.vhd" "20090914210631.000" "20090918214306.837":
   entity gen_memory at 22( 1409) + 0 on 346;
   architecture archi_gen_memory of gen_memory at 48( 2468) + 0 on 347;
-file / "../rtl/conv_circ.vhd" "20090914210631.000" "20090918214307.355":
-  entity conv_circ at 21( 1408) + 0 on 354;
-  architecture archi_conv_circ of conv_circ at 47( 2590) + 0 on 355;
-file / "../rtl/cpmem.vhd" "20090914210631.000" "20090918214307.734":
-  entity cpmem at 22( 1409) + 0 on 358;
-  architecture archi_cpmem of cpmem at 40( 2056) + 0 on 359;
 file / "gen_rom.vhd" "20090914210631.000" "20090918214309.365":
   entity gen_rom at 22( 1409) + 0 on 369;
   architecture archi_gen_rom of gen_rom at 45( 2091) + 0 on 370;
-file / "../rtl/sigshift.vhd" "20090918223118.000" "20090919003146.210":
-  entity sigshift at 22( 1409) + 0 on 381;
-  architecture archi_sigshift of sigshift at 43( 2241) + 0 on 382;
+file / "../rtl/dspalu_pac.vhd" "20090919114403.000" "20090920002545.235":
+  package dspalu_pac at 22( 1409) + 0 on 385 body;
+  package body dspalu_pac at 40( 2070) + 0 on 386;
+file / "bench_dspunit.vhd" "20090916111415.000" "20090920002545.430":
+  entity bench_dspunit at 22( 1409) + 0 on 389;
+  architecture archi_bench_dspunit of bench_dspunit at 31( 1708) + 0 on 390;
+file / "../rtl/dspalu_acc.vhd" "20090919114403.000" "20090920002546.256":
+  entity dspalu_acc at 22( 1409) + 0 on 393;
+  architecture archi_dspalu_acc of dspalu_acc at 59( 2851) + 0 on 394;
+file / "../rtl/conv_circ.vhd" "20090919114355.000" "20090920002546.658":
+  entity conv_circ at 21( 1408) + 0 on 397;
+  architecture archi_conv_circ of conv_circ at 47( 2496) + 0 on 398;
+file / "../rtl/cpmem.vhd" "20090919114356.000" "20090920002547.031":
+  entity cpmem at 22( 1409) + 0 on 401;
+  architecture archi_cpmem of cpmem at 40( 1994) + 0 on 402;
+file / "../rtl/dotcmul.vhd" "20090919114401.000" "20090920002547.757":
+  entity dotcmul at 22( 1409) + 0 on 405;
+  architecture archi_dotcmul of dotcmul at 46( 2414) + 0 on 406;
