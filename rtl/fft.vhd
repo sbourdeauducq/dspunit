@@ -110,6 +110,8 @@ architecture archi_fft of fft is
   signal   s_result2_shift        : std_logic_vector((sig_width - 1) downto 0);
   signal   s_end_ft               : std_logic;
   signal   s_angle_total          : std_logic_vector((angle_width - 1) downto 0);
+  signal   s_index_end           : std_logic;
+  signal   s_group_end           : std_logic;
 begin  -- archs_fft
   -----------------------------------------------------------------------------
   --
@@ -385,14 +387,14 @@ begin  -- archs_fft
           s_imag_part     <= '1';
 
           -- else compute index of next sample
-        elsif (s_next_index < s_radix_half) then
+        elsif (s_index_end = '1') then
           -- increment index
           s_butter_index  <= s_next_index((c_ind_width - 1) downto 0);
           s_butter_offset <= to_unsigned(0, c_ind_width);
           s_imag_part     <= '0';
           -- increment angle
           s_angle         <= s_angle + s_radix_count_down;
-        elsif (s_next_group < s_length_moins) then
+        elsif (s_group_end = '1') then
           -- next group
           s_butter_index  <= to_unsigned(0, c_ind_width);
           s_butter_group  <= s_next_group((c_ind_width - 1) downto 0);
@@ -422,6 +424,21 @@ begin  -- archs_fft
   end process p_addr_comput;
   s_next_index <= s_butter_index + 1;
   s_next_group <= s_butter_group + s_radix_count;
+  p_boundtest : process (clk)
+  begin -- process p_boundtest
+    if rising_edge(clk) then  -- rising clock edge
+      if (s_next_index < s_radix_half) then
+        s_index_end <= '1';
+      else
+        s_index_end <= '0';
+      end if;
+      if (s_next_group < s_length_moins) then
+        s_group_end <= '1';
+      else
+        s_group_end <= '0';
+      end if;
+    end if;
+  end process p_boundtest;
   -------------------------------------------------------------------------------
   -- address pipe : output is writting address
   -------------------------------------------------------------------------------
