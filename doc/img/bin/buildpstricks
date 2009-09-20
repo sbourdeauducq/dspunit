@@ -1,0 +1,35 @@
+#!/bin/sh
+#Programme de compilation et conversion des figures pour les documents pdflatex
+################################################################################
+
+#Creation d'un repertoire de travail
+mkdir FigResult
+
+#Compilation des figures PsTricks en pdf
+./bin/convertpstricks.pl $1 bin/figpstricks.txt > FigResult/$1
+latex FigResult/$1
+
+PREFIXE_FICHIER=${1%%'.tex'}    	# Supprime le suffixe ".tex".
+SUFFIXE_FICHIER_PS='.ps'          	# Suffixe pour le fichier ps.
+SUFFIXE_FICHIER_DVI='.dvi'         	# Suffixe pour le fichier dvi.
+SUFFIXE_FICHIER_PDF='.pdf'       	# Suffixe pour le fichier pdf.
+SUFFIXE_FICHIER_LOG='.log'       	# Suffixe pour le fichier log.
+SUFFIXE_FICHIER_AUX='.aux'       	# Suffixe pour le fichier aux.
+FICHIER_PS="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_PS"
+FICHIER_PDF="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_PDF"
+FICHIER_DVI="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_DVI"
+FICHIER_LOG="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_LOG"
+FICHIER_AUX="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_AUX"
+
+dvips -E $FICHIER_DVI
+epstopdf $FICHIER_PS
+
+rm -f $FICHIER_PS
+rm -f $FICHIER_DVI
+rm -f $FICHIER_LOG
+rm -f $FICHIER_AUX
+
+rm -rf FigResult
+
+########################################################################################################
+########################################################################################################

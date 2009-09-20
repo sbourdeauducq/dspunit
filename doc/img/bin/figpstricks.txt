@@ -1,0 +1,29 @@
+\documentclass{article}
+\usepackage{pst-eps} 
+\usepackage{pst-grad} 
+\usepackage{graphicx}
+%\input tmp.inputs
+\usepackage[french]{babel}             % Langue du document
+\usepackage[T1]{fontenc}               % Correspondance clavier -> document
+\usepackage[utf8]{inputenc}
+\pagestyle{empty}
+\usepackage{amssymb,amsbsy}
+\usepackage{verbatim}
+
+%\input ../Modele/Police
+%Commandes associ�es aux notations math�matiques
+\newcommand{\tenseur}[1]{\stackrel{\Rightarrow}{#1}}
+\newcommand{\M}[1]{\mathbf{#1}}
+\newcommand{\V}[1]{\mathbf{\underline{#1}}}
+\renewcommand{\H}{\mathbf{H}}
+\newcommand{\T}{T}
+
+
+\begin{document}
+\TeXtoEPS
+
+INSERT_FIG
+
+\endTeXtoEPS
+
+\end{document}

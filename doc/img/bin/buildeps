@@ -1,0 +1,114 @@
+#!/bin/sh
+#Programme de compilation et conversion des figures pour les documents pdflatex
+################################################################################
+
+genepstex ()
+{
+        echo "\documentclass{article}"
+        echo "\usepackage{graphicx}"
+        echo "\DeclareGraphicsExtensions{.eps, .ps, .jpg}"
+        echo "\DeclareGraphicsRule{.jpg}{eps}{.jpg.bb}{jpeg2ps -h -r 600 #1}"
+        echo "\pagestyle{empty}"
+        echo '\\begin{document}'
+        echo "\includegraphics{$1}"
+        echo "\end{document}"
+}
+
+#Creation d'un repertoire de travail
+mkdir FigResult
+
+#Compilation des figures PsTricks en pdf
+for i in `ls *.tex`
+do
+    ./bin/convertpstricks $i bin/figpstricks.txt
+#    CodageTxt -o "FigResult/$i" -f utf8 "FigResult/$i"
+    latex FigResult/$i
+
+    PREFIXE_FICHIER=${i%%'.tex'}    	# Supprime le suffixe ".tex".
+    SUFFIXE_FICHIER_PS='.ps'          	# Suffixe pour le fichier ps.
+    SUFFIXE_FICHIER_DVI='.dvi'         	# Suffixe pour le fichier dvi.
+    SUFFIXE_FICHIER_PDF='.pdf'       	# Suffixe pour le fichier pdf.
+    SUFFIXE_FICHIER_LOG='.log'       	# Suffixe pour le fichier log.
+    SUFFIXE_FICHIER_AUX='.aux'       	# Suffixe pour le fichier aux.
+    FICHIER_PS="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_PS"
+    FICHIER_PDF="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_PDF"
+    FICHIER_DVI="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_DVI"
+    FICHIER_LOG="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_LOG"
+    FICHIER_AUX="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_AUX"
+
+    dvips -E $FICHIER_DVI
+    epstopdf $FICHIER_PS
+
+    rm -f $FICHIER_PS
+    rm -f $FICHIER_DVI
+    rm -f $FICHIER_LOG
+    rm -f $FICHIER_AUX
+
+done
+
+#Conversion des images eps en pdf
+for i in `ls *.eps`
+do
+    ./bin/convertpstricks $i bin/figpstricks.txt
+
+    PREFIXE_FICHIER=${i%%'.eps'}    	# Supprime le suffixe ".tex".
+    SUFFIXE_FICHIER_TEX='.tex'          	# Suffixe pour le fichier tex.
+    SUFFIXE_FICHIER_PS='.ps'          	# Suffixe pour le fichier ps.
+    SUFFIXE_FICHIER_DVI='.dvi'         	# Suffixe pour le fichier dvi.
+    SUFFIXE_FICHIER_PDF='.pdf'       	# Suffixe pour le fichier pdf.
+    SUFFIXE_FICHIER_LOG='.log'       	# Suffixe pour le fichier log.
+    SUFFIXE_FICHIER_AUX='.aux'       	# Suffixe pour le fichier aux.
+    FICHIER_TEX="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_TEX"
+    FICHIER_PS="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_PS"
+    FICHIER_PDF="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_PDF"
+    FICHIER_DVI="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_DVI"
+    FICHIER_LOG="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_LOG"
+    FICHIER_AUX="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_AUX"
+{
+echo '\documentclass{article}'
+echo '\usepackage{graphicx}'
+echo '\DeclareGraphicsExtensions{.eps, .ps, .jpg}'
+echo '\DeclareGraphicsRule{.jpg}{eps}{.jpg.bb}{`jpeg2ps -h -r 600 #1}'
+echo '\pagestyle{empty}'
+echo '\\begin{document}'
+echo "\includegraphics{$i}"
+echo '\end{document}'
+} > FigResult/$FICHIER_TEX
+
+    latex FigResult/$FICHIER_TEX
+    dvips -E $FICHIER_DVI
+    epstopdf $FICHIER_PS
+
+    rm -f $FICHIER_PS
+    rm -f $FICHIER_DVI
+    rm -f $FICHIER_LOG
+    rm -f $FICHIER_AUX
+
+    genepstex $FICHIER_PDF > FigResult/$FICHIER_TEX
+
+done
+
+#Conversion des images bmp
+for i in `ls *.bmp`
+do
+    PREFIXE_FICHIER=${i%%'.bmp'}    	# Supprime le suffixe ".bmp".
+    SUFFIXE_FICHIER_PNG='.png'      	# Suffixe pour le fichier png.
+    FICHIER_PNG="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_PNG"
+
+    convert $i FICHIER_PNG
+done
+
+#Conversion des images gif
+for i in `ls *.gif`
+do
+    PREFIXE_FICHIER=${i%%'.gif'}    	# Supprime le suffixe ".gif".
+    SUFFIXE_FICHIER_PNG='.png'      	# Suffixe pour le fichier png.
+    FICHIER_PNG="$PREFIXE_FICHIER""$SUFFIXE_FICHIER_PNG"
+
+    convert $i FICHIER_PNG
+done
+
+rm -rf FigResult
+
+########################################################################################################
+########################################################################################################

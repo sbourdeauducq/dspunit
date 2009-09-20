@@ -1,0 +1,26 @@
+********************************************************************************
+*   DspUnit : Advanced So(P)C Sequential Signal Processor
+*   Copyright (C) 2007-2010 by Adrien LELONG (www.lelongdunet.com)                                                                           
+*
+********************************************************************************
+
+DspUnit is system architectural framework for Digital Signal Processing on SoC.
+It acts as processor peripheral and can be considered as a DSP accelerator.
+DspUnit provides various classical signal operators and can be easily extended for
+specific application purpose. Also, this component is bound to be connected to a processor. 
+
+-------------------------------------------------
+| TEST AND SIMULATION
+-------------------------------------------------
+
+DspUnit can be simulated using GHDL. For this purpose, ghdl and gtkwave software must be installed on your system.
+A simulation bash script ./sim/sim is provided to easily run simulation on a UNIX platform.
+To run DspUnit using the main testbench (bench_dspunit) run
+    > cd sim
+    > ./sim build dspunit
+    > ./sim run dpunit
+    > ./sim view dspunit
+
+Other testbench are provided in the sim directory in order to test various operation sequences.
+The bench_dspunit8 testbench is intended to test DspUnit with the regBtoW bridge for 8 bits buses.
+
