@@ -64,21 +64,21 @@ architecture archi_dsp_cmdregs of dsp_cmdregs is
   --=--------------------------------------------------------------------------
   -- @signals definition
   -----------------------------------------------------------------------------
-  signal s_dsp_cmdregs         : t_dsp_cmdregs;
-  signal s_dsp_cmdregs_buf     : t_dsp_cmdregs;
-  signal s_dsp_bus             : t_dsp_bus;
-  signal s_dsp_bus_conv_circ   : t_dsp_bus;
-  signal s_op_conv_circ_en     : std_logic;
-  signal s_opflag_select_inreg : std_logic_vector((opflag_width - 1) downto 0);
-  signal s_opcode_select_inreg : std_logic_vector((opcode_width - 1) downto 0);
-  signal s_runop               : std_logic;
-  signal s_runop_sync          : std_logic;
-  signal s_op_done_sync        : std_logic;
-  signal s_op_done_resync      : std_logic;
-  signal s_lut_out             : std_logic_vector((lut_out_width - 1) downto 0);
-  signal s_refresh_cmdregs     : std_logic_vector((c_refresh_cmdreg_length - 1) downto 0);
-  signal s_run_buf             : std_logic;
-  signal s_refresh_cmdregs_in  : std_logic;
+  signal   s_dsp_cmdregs           : t_dsp_cmdregs;
+  signal   s_dsp_cmdregs_buf       : t_dsp_cmdregs;
+  signal   s_dsp_bus               : t_dsp_bus;
+  signal   s_dsp_bus_conv_circ     : t_dsp_bus;
+  signal   s_op_conv_circ_en       : std_logic;
+  signal   s_opflag_select_inreg   : std_logic_vector((opflag_width - 1) downto 0);
+  signal   s_opcode_select_inreg   : std_logic_vector((opcode_width - 1) downto 0);
+  signal   s_runop                 : std_logic;
+  signal   s_runop_sync            : std_logic;
+  signal   s_op_done_sync          : std_logic;
+  signal   s_op_done_resync        : std_logic;
+  signal   s_lut_out               : std_logic_vector((lut_out_width - 1) downto 0);
+  signal   s_refresh_cmdregs       : std_logic_vector((c_refresh_cmdreg_length - 1) downto 0);
+  signal   s_run_buf               : std_logic;
+  signal   s_refresh_cmdregs_in    : std_logic;
 begin  -- archs_dsp_cmdregs
   -----------------------------------------------------------------------------
   --

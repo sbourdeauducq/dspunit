@@ -197,74 +197,74 @@ begin  -- archs_sigshift
   -- index with bit reverse if needed
   s_addr_r_m0_tmp((cmdreg_width - 1) downto c_ind_width) <= (others => '0');
   s_addr_r_m0_tmp((c_ind_width - 1) downto 1)            <= s_sample_index((c_ind_width - 1) downto 1) when opflag_select(opflagbit_bitrev) = '0' else
-                                                 zeros(c_ind_width - 4) &
-                                                 s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 4))
-                                                 when s_length(4) = '1'  else
-                                                 zeros(c_ind_width - 5) &
-                                                 s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 5))
-                                                 when s_length(5) = '1'  else
-                                                 zeros(c_ind_width - 6) &
-                                                 s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 6))
-                                                 when s_length(6) = '1'  else
-                                                 zeros(c_ind_width - 7) &
-                                                 s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 7))
-                                                 when s_length(7) = '1'  else
-                                                 zeros(c_ind_width - 8) &
-                                                 s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 8))
-                                                 when s_length(8) = '1'  else
-                                                 zeros(c_ind_width - 9) &
-                                                 s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 9))
-                                                 when s_length(9) = '1'  else
-                                                 zeros(c_ind_width - 10) &
-                                                 s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 10))
-                                                 when s_length(10) = '1' else
-                                                 zeros(c_ind_width - 11) &
-                                                 s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 11))
-                                                 when s_length(11) = '1' else
-                                                 zeros(c_ind_width - 12) &
-                                                 s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 12))
-                                                 when s_length(12) = '1' else
-                                                 zeros(c_ind_width - 13) &
-                                                 s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 13))
-                                                 when s_length(13) = '1' else
-                                                 s_sample_index_rev;
+                                                            zeros(c_ind_width - 4) &
+                                                            s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 4))
+                                                            when s_length(4) = '1'  else
+                                                            zeros(c_ind_width - 5) &
+                                                            s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 5))
+                                                            when s_length(5) = '1'  else
+                                                            zeros(c_ind_width - 6) &
+                                                            s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 6))
+                                                            when s_length(6) = '1'  else
+                                                            zeros(c_ind_width - 7) &
+                                                            s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 7))
+                                                            when s_length(7) = '1'  else
+                                                            zeros(c_ind_width - 8) &
+                                                            s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 8))
+                                                            when s_length(8) = '1'  else
+                                                            zeros(c_ind_width - 9) &
+                                                            s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 9))
+                                                            when s_length(9) = '1'  else
+                                                            zeros(c_ind_width - 10) &
+                                                            s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 10))
+                                                            when s_length(10) = '1' else
+                                                            zeros(c_ind_width - 11) &
+                                                            s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 11))
+                                                            when s_length(11) = '1' else
+                                                            zeros(c_ind_width - 12) &
+                                                            s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 12))
+                                                            when s_length(12) = '1' else
+                                                            zeros(c_ind_width - 13) &
+                                                            s_sample_index_rev((c_ind_width - 2) downto (c_ind_width - 13))
+                                                            when s_length(13) = '1' else
+                                                            s_sample_index_rev;
 
   s_addr_r_m0_tmp(0) <= s_sample_index(0);
 
   -- index with bit reverse if needed
   s_addr_w_m0_tmp((cmdreg_width - 1) downto c_ind_width) <= (others => '0');
   s_addr_w_m0_tmp((c_ind_width - 1) downto 1)            <= s_sample_index_w((c_ind_width - 1) downto 1) when opflag_select(opflagbit_bitrev) = '0' else
-                                                 zeros(c_ind_width - 4) &
-                                                 s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 4))
-                                                 when s_length(4) = '1'  else
-                                                 zeros(c_ind_width - 5) &
-                                                 s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 5))
-                                                 when s_length(5) = '1'  else
-                                                 zeros(c_ind_width - 6) &
-                                                 s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 6))
-                                                 when s_length(6) = '1'  else
-                                                 zeros(c_ind_width - 7) &
-                                                 s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 7))
-                                                 when s_length(7) = '1'  else
-                                                 zeros(c_ind_width - 8) &
-                                                 s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 8))
-                                                 when s_length(8) = '1'  else
-                                                 zeros(c_ind_width - 9) &
-                                                 s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 9))
-                                                 when s_length(9) = '1'  else
-                                                 zeros(c_ind_width - 10) &
-                                                 s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 10))
-                                                 when s_length(10) = '1' else
-                                                 zeros(c_ind_width - 11) &
-                                                 s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 11))
-                                                 when s_length(11) = '1' else
-                                                 zeros(c_ind_width - 12) &
-                                                 s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 12))
-                                                 when s_length(12) = '1' else
-                                                 zeros(c_ind_width - 13) &
-                                                 s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 13))
-                                                 when s_length(13) = '1' else
-                                                 s_sample_index_w_rev;
+                                                            zeros(c_ind_width - 4) &
+                                                            s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 4))
+                                                            when s_length(4) = '1'  else
+                                                            zeros(c_ind_width - 5) &
+                                                            s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 5))
+                                                            when s_length(5) = '1'  else
+                                                            zeros(c_ind_width - 6) &
+                                                            s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 6))
+                                                            when s_length(6) = '1'  else
+                                                            zeros(c_ind_width - 7) &
+                                                            s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 7))
+                                                            when s_length(7) = '1'  else
+                                                            zeros(c_ind_width - 8) &
+                                                            s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 8))
+                                                            when s_length(8) = '1'  else
+                                                            zeros(c_ind_width - 9) &
+                                                            s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 9))
+                                                            when s_length(9) = '1'  else
+                                                            zeros(c_ind_width - 10) &
+                                                            s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 10))
+                                                            when s_length(10) = '1' else
+                                                            zeros(c_ind_width - 11) &
+                                                            s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 11))
+                                                            when s_length(11) = '1' else
+                                                            zeros(c_ind_width - 12) &
+                                                            s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 12))
+                                                            when s_length(12) = '1' else
+                                                            zeros(c_ind_width - 13) &
+                                                            s_sample_index_w_rev((c_ind_width - 2) downto (c_ind_width - 13))
+                                                            when s_length(13) = '1' else
+                                                            s_sample_index_w_rev;
 
   s_addr_w_m0_tmp(0) <= s_sample_index_w(0);
 

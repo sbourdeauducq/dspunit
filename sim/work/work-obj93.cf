@@ -1,5 +1,8 @@
 v 3
-file "" "../rtl/fft.vhd" "20090920020004.000" "20090920041717.566":
+file "" "../rtl/dsp_cmdregs.vhd" "20090920024647.000" "20090920134810.947":
+  entity dsp_cmdregs at 22( 1409) + 0 on 415;
+  architecture archi_dsp_cmdregs of dsp_cmdregs at 54( 2841) + 0 on 416;
+file / "../rtl/fft.vhd" "20090920020004.000" "20090920041717.566":
   entity fft at 22( 1409) + 0 on 411;
   architecture archi_fft of fft at 47( 2459) + 0 on 412;
 file / "../rtl/dotcmul.vhd" "20090919114401.000" "20090920002547.757":
@@ -61,9 +64,6 @@ file / "rompkg.vhd" "20090914210631.000" "20090918214309.331":
 file / "../rtl/dspunit_pac.vhd" "20090919114404.000" "20090920002545.358":
   package dspunit_pac at 22( 1409) + 0 on 387 body;
   package body dspunit_pac at 177( 8271) + 0 on 388;
-file / "../top/dspunit.vhd" "20090919222542.000" "20090920002545.583":
-  entity dspunit at 22( 1409) + 0 on 391;
-  architecture archi_dspunit of dspunit at 65( 3245) + 0 on 392;
 file / "../rtl/dsplut.vhd" "20090919114403.000" "20090920002546.580":
   entity dsplut at 22( 1409) + 0 on 395;
   architecture archi_dsplut of dsplut at 40( 2002) + 0 on 396;
@@ -73,6 +73,6 @@ file / "../rtl/cpflip.vhd" "20090919114356.000" "20090920002546.879":
 file / "../rtl/sigshift.vhd" "20090919114417.000" "20090920002548.086":
   entity sigshift at 22( 1409) + 0 on 407;
   architecture archi_sigshift of sigshift at 43( 2182) + 0 on 408;
-file / "../rtl/dsp_cmdregs.vhd" "20090919220712.000" "20090920002745.604":
-  entity dsp_cmdregs at 22( 1409) + 0 on 409;
-  architecture archi_dsp_cmdregs of dsp_cmdregs at 54( 2841) + 0 on 410;
+file "" "../top/dspunit.vhd" "20090920114720.000" "20090920134810.163":
+  entity dspunit at 22( 1409) + 0 on 413;
+  architecture archi_dspunit of dspunit at 65( 3245) + 0 on 414;

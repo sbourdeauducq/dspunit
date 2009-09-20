@@ -110,8 +110,8 @@ architecture archi_fft of fft is
   signal   s_result2_shift        : std_logic_vector((sig_width - 1) downto 0);
   signal   s_end_ft               : std_logic;
   signal   s_angle_total          : std_logic_vector((angle_width - 1) downto 0);
-  signal   s_index_end           : std_logic;
-  signal   s_group_end           : std_logic;
+  signal   s_index_end            : std_logic;
+  signal   s_group_end            : std_logic;
 begin  -- archs_fft
   -----------------------------------------------------------------------------
   --
@@ -425,8 +425,8 @@ begin  -- archs_fft
   s_next_index <= s_butter_index + 1;
   s_next_group <= s_butter_group + s_radix_count;
   p_boundtest : process (clk)
-  begin -- process p_boundtest
-    if rising_edge(clk) then  -- rising clock edge
+  begin  -- process p_boundtest
+    if rising_edge(clk) then              -- rising clock edge
       if (s_next_index < s_radix_half) then
         s_index_end <= '1';
       else
@@ -544,7 +544,7 @@ begin  -- archs_fft
   s_dsp_bus.lut_select                                    <= lutsel_cos;
   -- shift control
   s_result1_shift                                         <= result1((sig_width - 1) downto 0) when s_shift_pipe(c_shiftflag_pipe_depth - 1) = '0'
-                     else result1(sig_width downto 1);
+                                                             else result1(sig_width downto 1);
   s_result2_shift <= result2((sig_width - 1) downto 0) when s_shift_pipe(c_shiftflag_pipe_depth - 1) = '0'
                      else result2(sig_width downto 1);
 end archi_fft;
