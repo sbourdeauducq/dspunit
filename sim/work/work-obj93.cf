@@ -1,31 +1,28 @@
 v 3
-file "" "../rtl/dsp_cmdregs.vhd" "20090920024647.000" "20090920134810.947":
-  entity dsp_cmdregs at 22( 1409) + 0 on 415;
-  architecture archi_dsp_cmdregs of dsp_cmdregs at 54( 2841) + 0 on 416;
-file / "../rtl/fft.vhd" "20090920020004.000" "20090920041717.566":
-  entity fft at 22( 1409) + 0 on 411;
-  architecture archi_fft of fft at 47( 2459) + 0 on 412;
-file / "../rtl/dotcmul.vhd" "20090919114401.000" "20090920002547.757":
-  entity dotcmul at 22( 1409) + 0 on 405;
-  architecture archi_dotcmul of dotcmul at 46( 2414) + 0 on 406;
-file / "../rtl/cpmem.vhd" "20090919114356.000" "20090920002547.031":
-  entity cpmem at 22( 1409) + 0 on 401;
-  architecture archi_cpmem of cpmem at 40( 1994) + 0 on 402;
-file / "../rtl/conv_circ.vhd" "20090919114355.000" "20090920002546.658":
-  entity conv_circ at 21( 1408) + 0 on 397;
-  architecture archi_conv_circ of conv_circ at 47( 2496) + 0 on 398;
-file / "../rtl/dspalu_acc.vhd" "20090919114403.000" "20090920002546.256":
-  entity dspalu_acc at 22( 1409) + 0 on 393;
-  architecture archi_dspalu_acc of dspalu_acc at 59( 2851) + 0 on 394;
-file / "bench_dspunit.vhd" "20090916111415.000" "20090920002545.430":
-  entity bench_dspunit at 22( 1409) + 0 on 389;
-  architecture archi_bench_dspunit of bench_dspunit at 31( 1708) + 0 on 390;
-file / "../rtl/dspalu_pac.vhd" "20090919114403.000" "20090920002545.235":
-  package dspalu_pac at 22( 1409) + 0 on 385 body;
-  package body dspalu_pac at 40( 2070) + 0 on 386;
-file / "gen_rom.vhd" "20090914210631.000" "20090918214309.365":
-  entity gen_rom at 22( 1409) + 0 on 369;
-  architecture archi_gen_rom of gen_rom at 45( 2091) + 0 on 370;
+file "" "../rtl/sigshift.vhd" "20090920120313.000" "20090923001502.445":
+  entity sigshift at 22( 1409) + 0 on 474;
+  architecture archi_sigshift of sigshift at 43( 2182) + 0 on 475;
+file "" "../rtl/fft.vhd" "20090920120311.000" "20090923001501.568":
+  entity fft at 22( 1409) + 0 on 470;
+  architecture archi_fft of fft at 47( 2459) + 0 on 471;
+file "" "../rtl/cpmem.vhd" "20090920120250.000" "20090923001501.210":
+  entity cpmem at 22( 1409) + 0 on 466;
+  architecture archi_cpmem of cpmem at 40( 1994) + 0 on 467;
+file "" "../rtl/conv_circ.vhd" "20090920120249.000" "20090923001500.822":
+  entity conv_circ at 21( 1408) + 0 on 462;
+  architecture archi_conv_circ of conv_circ at 47( 2496) + 0 on 463;
+file "" "../rtl/dsp_cmdregs.vhd" "20090920120258.000" "20090923001500.587":
+  entity dsp_cmdregs at 22( 1409) + 0 on 458;
+  architecture archi_dsp_cmdregs of dsp_cmdregs at 54( 2841) + 0 on 459;
+file "" "../top/dspunit.vhd" "20090922221419.000" "20090923001459.515":
+  entity dspunit at 22( 1409) + 0 on 454;
+  architecture archi_dspunit of dspunit at 65( 3245) + 0 on 455;
+file "" "../rtl/dspunit_pac.vhd" "20090922221456.000" "20090923001459.303":
+  package dspunit_pac at 22( 1409) + 0 on 450 body;
+  package body dspunit_pac at 185( 8639) + 0 on 451;
+file / "gen_rom.vhd" "20090914210631.000" "20090923000730.634":
+  entity gen_rom at 22( 1409) + 0 on 446;
+  architecture archi_gen_rom of gen_rom at 45( 2091) + 0 on 447;
 file / "gen_memory.vhd" "20090914210631.000" "20090918214306.837":
   entity gen_memory at 22( 1409) + 0 on 346;
   architecture archi_gen_memory of gen_memory at 48( 2468) + 0 on 347;
@@ -56,23 +53,26 @@ file / "gen_memoryf.vhd" "20090914210631.000" "20090918214306.738":
 file / "clock_gen.vhd" "20090914210631.000" "20090918214306.926":
   entity clock_gen at 31( 1223) + 0 on 348;
   architecture archi_clock_gen of clock_gen at 47( 1586) + 0 on 349;
-file / "../rtl/bit_manipulation.vhdl" "20090914213721.000" "20090918214307.888":
-  package bit_manipulation at 22( 1015) + 0 on 360 body;
-  package body bit_manipulation at 82( 3397) + 0 on 361;
-file / "rompkg.vhd" "20090914210631.000" "20090918214309.331":
-  package rompkg at 47( 1910) + 0 on 368;
-file / "../rtl/dspunit_pac.vhd" "20090919114404.000" "20090920002545.358":
-  package dspunit_pac at 22( 1409) + 0 on 387 body;
-  package body dspunit_pac at 177( 8271) + 0 on 388;
-file / "../rtl/dsplut.vhd" "20090919114403.000" "20090920002546.580":
-  entity dsplut at 22( 1409) + 0 on 395;
-  architecture archi_dsplut of dsplut at 40( 2002) + 0 on 396;
-file / "../rtl/cpflip.vhd" "20090919114356.000" "20090920002546.879":
-  entity cpflip at 22( 1409) + 0 on 399;
-  architecture archi_cpflip of cpflip at 40( 1996) + 0 on 400;
-file / "../rtl/sigshift.vhd" "20090919114417.000" "20090920002548.086":
-  entity sigshift at 22( 1409) + 0 on 407;
-  architecture archi_sigshift of sigshift at 43( 2182) + 0 on 408;
-file "" "../top/dspunit.vhd" "20090920114720.000" "20090920134810.163":
-  entity dspunit at 22( 1409) + 0 on 413;
-  architecture archi_dspunit of dspunit at 65( 3245) + 0 on 414;
+file / "rompkg.vhd" "20090914210631.000" "20090923000730.594":
+  package rompkg at 47( 1910) + 0 on 445;
+file "" "../rtl/dspalu_pac.vhd" "20090922221456.000" "20090923001459.249":
+  package dspalu_pac at 22( 1409) + 0 on 448 body;
+  package body dspalu_pac at 65( 3812) + 0 on 449;
+file "" "bench_dspunit.vhd" "20090922220344.000" "20090923001459.375":
+  entity bench_dspunit at 22( 1409) + 0 on 452;
+  architecture archi_bench_dspunit of bench_dspunit at 31( 1708) + 0 on 453;
+file "" "../rtl/dspalu_acc.vhd" "20090922221456.000" "20090923001500.233":
+  entity dspalu_acc at 22( 1409) + 0 on 456;
+  architecture archi_dspalu_acc of dspalu_acc at 59( 3061) + 0 on 457;
+file "" "../rtl/dsplut.vhd" "20090920120259.000" "20090923001500.746":
+  entity dsplut at 22( 1409) + 0 on 460;
+  architecture archi_dsplut of dsplut at 40( 2002) + 0 on 461;
+file "" "../rtl/cpflip.vhd" "20090920120250.000" "20090923001501.041":
+  entity cpflip at 22( 1409) + 0 on 464;
+  architecture archi_cpflip of cpflip at 40( 1996) + 0 on 465;
+file "" "../rtl/bit_manipulation.vhdl" "20090922221456.000" "20090923001501.376":
+  package bit_manipulation at 22( 1015) + 0 on 468 body;
+  package body bit_manipulation at 82( 3397) + 0 on 469;
+file "" "../rtl/dotcmul.vhd" "20090920120255.000" "20090923001502.095":
+  entity dotcmul at 22( 1409) + 0 on 472;
+  architecture archi_dotcmul of dotcmul at 46( 2414) + 0 on 473;

@@ -84,10 +84,10 @@ architecture archi_dspunit of dspunit is
       b2          : in  std_logic_vector((sig_width - 1) downto 0);
       clk         : in  std_logic;
       clr_acc     : in  std_logic;
-      acc_mode1   : in  t_acc_mode;
-      acc_mode2   : in  t_acc_mode;
-      alu_select  : in  t_alu_select;
-      cmp_mode    : in  t_cmp_mode;
+      acc_mode1   : in  std_logic_vector((acc_mode_width - 1) downto 0); -- t_acc_mode;
+      acc_mode2   : in  std_logic_vector((acc_mode_width - 1) downto 0); -- t_acc_mode;
+      alu_select  : in  std_logic_vector((alu_select_width - 1) downto 0); -- t_alu_select;
+      cmp_mode    : in  std_logic_vector((cmp_mode_width - 1) downto 0); -- t_cmp_mode;
       cmp_pol     : in  std_logic;
       cmp_store   : in  std_logic;
       chain_acc   : in  std_logic;
@@ -225,53 +225,42 @@ architecture archi_dspunit of dspunit is
   --=--------------------------------------------------------------------------
   -- @signals definition
   -----------------------------------------------------------------------------
-  type t_opsel is (
-    sel_conv_circ,
-    sel_cpflip ,
-    sel_dotop ,
-    sel_cpmem ,
-    sel_fft ,
-    sel_dotcmul ,
-    sel_sigshift ,
-    sel_none);
-
-  signal s_opmux_select      : t_opsel;
-  signal s_clr_acc           : std_logic;
-  signal s_alu_result1       : std_logic_vector((sig_width - 1) downto 0);
-  signal s_alu_result_acc1   : std_logic_vector((acc_width - 1) downto 0);
-  signal s_alu_result2       : std_logic_vector((sig_width - 1) downto 0);
-  signal s_alu_result_acc2   : std_logic_vector((acc_width - 1) downto 0);
-  signal s_alu_result_sum    : std_logic_vector((2 * sig_width - 1) downto 0);
-  signal s_op_conv_circ_en   : std_logic;
-  signal s_opflag_select     : std_logic_vector((opflag_width - 1) downto 0);
-  signal s_opcode_select     : std_logic_vector((opcode_width - 1) downto 0);
-  signal s_offset_0          : unsigned((cmdreg_width - 1) downto 0);
-  signal s_offset_1          : unsigned((cmdreg_width - 1) downto 0);
-  signal s_offset_2          : unsigned((cmdreg_width - 1) downto 0);
-  signal s_length0           : std_logic_vector((cmdreg_data_width - 1) downto 0);
-  signal s_length1           : std_logic_vector((cmdreg_data_width - 1) downto 0);
-  signal s_length2           : std_logic_vector((cmdreg_data_width - 1) downto 0);
-  signal s_gcount            : unsigned(15 downto 0);
-  signal s_dsp_bus           : t_dsp_bus;
-  signal s_dsp_bus_conv_circ : t_dsp_bus;
-  signal s_test              : std_logic_vector(15 downto 0);
-  signal s_op_cpflip_en      : std_logic;
-  signal s_dsp_bus_cpflip    : t_dsp_bus;
-  signal s_op_dotop_en       : std_logic;
-  signal s_dsp_bus_dotop     : t_dsp_bus;
-  signal s_op_cpmem_en       : std_logic;
-  signal s_dsp_bus_cpmem     : t_dsp_bus;
-  signal s_op_fft_en         : std_logic;
-  signal s_op_dotcmul_en     : std_logic;
-  signal s_dsp_bus_fft       : t_dsp_bus;
-  signal s_dsp_bus_dotcmul   : t_dsp_bus;
-  signal s_lut_out           : std_logic_vector((lut_out_width - 1) downto 0);
-  signal s_alu_cmp_reg       : std_logic_vector((acc_width - 1) downto 0);
-  signal s_alu_cmp_out       : std_logic;
-  signal s_cmp_greater       : std_logic;
-  signal s_dsp_bus_sigshift  : t_dsp_bus;
-  signal s_op_sigshift_en    : std_logic;
-  signal s_chain_acc         : std_logic;
+  signal s_clr_acc             : std_logic;
+  signal s_alu_result1         : std_logic_vector((sig_width - 1) downto 0);
+  signal s_alu_result_acc1     : std_logic_vector((acc_width - 1) downto 0);
+  signal s_alu_result2         : std_logic_vector((sig_width - 1) downto 0);
+  signal s_alu_result_acc2     : std_logic_vector((acc_width - 1) downto 0);
+  signal s_alu_result_sum      : std_logic_vector((2 * sig_width - 1) downto 0);
+  signal s_op_conv_circ_en     : std_logic;
+  signal s_opflag_select       : std_logic_vector((opflag_width - 1) downto 0);
+  signal s_opcode_select       : std_logic_vector((opcode_width - 1) downto 0);
+  signal s_offset_0            : unsigned((cmdreg_width - 1) downto 0);
+  signal s_offset_1            : unsigned((cmdreg_width - 1) downto 0);
+  signal s_offset_2            : unsigned((cmdreg_width - 1) downto 0);
+  signal s_length0             : std_logic_vector((cmdreg_data_width - 1) downto 0);
+  signal s_length1             : std_logic_vector((cmdreg_data_width - 1) downto 0);
+  signal s_length2             : std_logic_vector((cmdreg_data_width - 1) downto 0);
+  signal s_gcount              : unsigned(15 downto 0);
+  signal s_dsp_bus             : t_dsp_bus;
+  signal s_dsp_bus_conv_circ   : t_dsp_bus;
+  signal s_test                : std_logic_vector(15 downto 0);
+  signal s_op_cpflip_en        : std_logic;
+  signal s_dsp_bus_cpflip      : t_dsp_bus;
+  signal s_op_dotop_en         : std_logic;
+  signal s_dsp_bus_dotop       : t_dsp_bus;
+  signal s_op_cpmem_en         : std_logic;
+  signal s_dsp_bus_cpmem       : t_dsp_bus;
+  signal s_op_fft_en           : std_logic;
+  signal s_op_dotcmul_en       : std_logic;
+  signal s_dsp_bus_fft         : t_dsp_bus;
+  signal s_dsp_bus_dotcmul     : t_dsp_bus;
+  signal s_lut_out             : std_logic_vector((lut_out_width - 1) downto 0);
+  signal s_alu_cmp_reg         : std_logic_vector((acc_width - 1) downto 0);
+  signal s_alu_cmp_out         : std_logic;
+  signal s_cmp_greater         : std_logic;
+  signal s_dsp_bus_sigshift    : t_dsp_bus;
+  signal s_op_sigshift_en      : std_logic;
+  signal s_chain_acc           : std_logic;
 begin  -- archs_dspunit
   -----------------------------------------------------------------------------
   --
@@ -433,29 +422,6 @@ begin  -- archs_dspunit
       end if;
     end if;
   end process p_count;
-  p_opselect : process (clk)
-  begin  -- process p_opselect
-    if rising_edge(clk) then            -- rising clock edge
-      case s_opcode_select is
-        when opcode_conv_circ =>
-          s_opmux_select <= sel_conv_circ;
-        when opcode_cpflip =>
-          s_opmux_select <= sel_cpflip;
-        when opcode_dotop =>
-          s_opmux_select <= sel_dotop;
-        when opcode_cpmem =>
-          s_opmux_select <= sel_cpmem;
-        when opcode_fft =>
-          s_opmux_select <= sel_fft;
-        when opcode_dotcmul =>
-          s_opmux_select <= sel_dotcmul;
-        when opcode_sigshift =>
-          s_opmux_select <= sel_sigshift;
-        when others =>
-          s_opmux_select <= sel_none;
-      end case;
-    end if;
-  end process p_opselect;
   --=---------------------------------------------------------------------------
   --
   -- @concurrent signal assignments
@@ -467,21 +433,21 @@ begin  -- archs_dspunit
   -------------------------------------------------------------------------------
   -- multiplexer of the dsp unit bus
   -------------------------------------------------------------------------------
-  s_op_conv_circ_en <= '1' when s_opmux_select = sel_conv_circ else '0';
-  s_op_cpflip_en    <= '1' when s_opmux_select = sel_cpflip    else '0';
-  s_op_dotop_en     <= '1' when s_opmux_select = sel_dotop     else '0';
-  s_op_cpmem_en     <= '1' when s_opmux_select = sel_cpmem     else '0';
-  s_op_fft_en       <= '1' when s_opmux_select = sel_fft       else '0';
-  s_op_dotcmul_en   <= '1' when s_opmux_select = sel_dotcmul   else '0';
-  s_op_sigshift_en  <= '1' when s_opmux_select = sel_sigshift  else '0';
+  s_op_conv_circ_en <= '1' when s_opcode_select = opcode_conv_circ else '0';
+  s_op_cpflip_en    <= '1' when s_opcode_select = opcode_cpflip    else '0';
+  s_op_dotop_en     <= '1' when s_opcode_select = opcode_dotop     else '0';
+  s_op_cpmem_en     <= '1' when s_opcode_select = opcode_cpmem     else '0';
+  s_op_fft_en       <= '1' when s_opcode_select = opcode_fft       else '0';
+  s_op_dotcmul_en   <= '1' when s_opcode_select = opcode_dotcmul   else '0';
+  s_op_sigshift_en  <= '1' when s_opcode_select = opcode_sigshift  else '0';
   s_dsp_bus         <=
-    s_dsp_bus_conv_circ when s_opmux_select = sel_conv_circ else
-    s_dsp_bus_cpflip    when s_opmux_select = sel_cpflip    else
-    s_dsp_bus_dotop     when s_opmux_select = sel_dotop     else
-    s_dsp_bus_cpmem     when s_opmux_select = sel_cpmem     else
-    s_dsp_bus_fft       when s_opmux_select = sel_fft       else
-    s_dsp_bus_dotcmul   when s_opmux_select = sel_dotcmul   else
-    s_dsp_bus_sigshift  when s_opmux_select = sel_sigshift  else
+    s_dsp_bus_conv_circ when s_opcode_select = opcode_conv_circ else
+    s_dsp_bus_cpflip    when s_opcode_select = opcode_cpflip    else
+    s_dsp_bus_dotop     when s_opcode_select = opcode_dotop     else
+    s_dsp_bus_cpmem     when s_opcode_select = opcode_cpmem     else
+    s_dsp_bus_fft       when s_opcode_select = opcode_fft       else
+    s_dsp_bus_dotcmul   when s_opcode_select = opcode_dotcmul   else
+    s_dsp_bus_sigshift  when s_opcode_select = opcode_sigshift  else
     c_dsp_bus_init;
 
 

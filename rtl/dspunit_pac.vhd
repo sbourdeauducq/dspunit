@@ -71,10 +71,10 @@ package dspunit_pac is
     mul_in_b1      : std_logic_vector((sig_width - 1) downto 0);
     mul_in_a2      : std_logic_vector((sig_width - 1) downto 0);
     mul_in_b2      : std_logic_vector((sig_width - 1) downto 0);
-    acc_mode1      : t_acc_mode;
-    acc_mode2      : t_acc_mode;
-    alu_select     : t_alu_select;
-    cmp_mode       : t_cmp_mode;
+    acc_mode1      : std_logic_vector((acc_mode_width - 1) downto 0); -- t_acc_mode;
+    acc_mode2      : std_logic_vector((acc_mode_width - 1) downto 0); -- t_acc_mode;
+    alu_select     : std_logic_vector((alu_select_width - 1) downto 0); -- t_alu_select;
+    cmp_mode       : std_logic_vector((cmp_mode_width - 1) downto 0); -- t_cmp_mode;
     cmp_pol        : std_logic;
     cmp_store      : std_logic;
     -- global counter
@@ -119,6 +119,14 @@ package dspunit_pac is
     lut_in         => (others => '0'),
     lut_select     => (others => '0')
     );
+
+    -- function "or" (a, b : t_dsp_bus) return t_dsp_bus is
+    --   t_dsp_bus y;
+    -- begin
+    --   -- y <= a or b;
+
+    --   return y;
+    -- end "or";
 -------------------------------------------------------------------------------
 -- Register address
 -------------------------------------------------------------------------------

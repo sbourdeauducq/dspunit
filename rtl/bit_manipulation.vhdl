@@ -394,6 +394,18 @@ package body Bit_Manipulation is
 	  return yy;
 	end bitbit_and;
 
+	function bitbit_or(A : in std_logic_vector; B : in std_logic_vector) return std_logic_vector is
+	  constant L : natural := A'length;
+	  alias aa : std_logic_vector((L - 1) downto 0) is A;
+	  alias bb : std_logic_vector((L - 1) downto 0) is B;
+	  variable yy : std_logic_vector((L - 1) downto 0);
+	begin
+	  for i in L-1 downto 0 loop
+	    yy(i) := aa(i) or bb(i);
+	  end loop;
+	  return yy;
+	end bitbit_or;
+
 end Bit_Manipulation;
 
 -- vi: set ts=4 sw=4 equalprg="fmt -72 -p--": please

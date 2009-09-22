@@ -31,9 +31,34 @@ package dspalu_pac is
   function sig_one(size : natural) return signed;
   function sig_one(size : natural) return std_logic_vector;
 
-  type t_acc_mode is (acc_store, acc_sumstore, acc_diff, acc_add, acc_sub, acc_back_add, acc_minback_add, acc_minback_sub);
-  type t_alu_select is (alu_add, alu_muladd, alu_mul, alu_cmul, alu_cmul_conj);
-  type t_cmp_mode is (cmp_acc1, cmp_acc2);
+  -- type t_acc_mode is (acc_store, acc_sumstore, acc_diff, acc_add, acc_sub, acc_back_add, acc_minback_add, acc_minback_sub);
+  constant acc_mode_width  : natural := 4;
+  -- alias t_acc_mode is std_logic_vector(3 downto 0);
+  constant acc_store       : std_logic_vector((acc_mode_width - 1) downto 0) := x"1";
+  constant acc_sumstore    : std_logic_vector((acc_mode_width - 1) downto 0) := x"2";
+  constant acc_diff        : std_logic_vector((acc_mode_width - 1) downto 0) := x"3";
+  constant acc_add         : std_logic_vector((acc_mode_width - 1) downto 0) := x"4";
+  constant acc_sub         : std_logic_vector((acc_mode_width - 1) downto 0) := x"5";
+  constant acc_back_add    : std_logic_vector((acc_mode_width - 1) downto 0) := x"6";
+  constant acc_minback_add : std_logic_vector((acc_mode_width - 1) downto 0) := x"7";
+  constant acc_minback_sub : std_logic_vector((acc_mode_width - 1) downto 0) := x"8";
+
+  -- type t_alu_select is (alu_add, alu_muladd, alu_mul, alu_cmul, alu_cmul_conj);
+  -- alias t_alu_select is std_logic_vector(3 downto 0);
+  constant alu_select_width : natural := 4;
+  -- constant alu_add       : std_logic_vector(3 downto 0) := "0000";
+  constant alu_none      : std_logic_vector((alu_select_width - 1) downto 0) := "0000";
+  constant alu_muladd    : std_logic_vector((alu_select_width - 1) downto 0) := "0001";
+  constant alu_mul       : std_logic_vector((alu_select_width - 1) downto 0) := "0010";
+  constant alu_cmul      : std_logic_vector((alu_select_width - 1) downto 0) := "0100";
+  constant alu_cmul_conj : std_logic_vector((alu_select_width - 1) downto 0) := "1000";
+
+  -- type t_cmp_mode is (cmp_acc1, cmp_acc2);
+  constant cmp_mode_width : natural := 2;
+  -- alias t_cmp_mode is std_logic_vector(1 downto 0);
+  constant cmp_none : std_logic_vector((cmp_mode_width - 1) downto 0) := "00";
+  constant cmp_acc1 : std_logic_vector((cmp_mode_width - 1) downto 0) := "01";
+  constant cmp_acc2 : std_logic_vector((cmp_mode_width - 1) downto 0) := "10";
 
 end dspalu_pac;
 
