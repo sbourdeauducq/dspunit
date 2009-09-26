@@ -87,9 +87,9 @@ architecture archi_bench_dspalu of bench_dspalu is
   signal s_b2                : std_logic_vector((sig_width - 1) downto 0);
   signal s_clk               : std_logic;
   signal s_clr_acc           : std_logic;
-  signal s_acc_mode1         : t_acc_mode;
-  signal s_acc_mode2         : t_acc_mode;
-  signal s_alu_select        : t_alu_select;
+  signal s_acc_mode1         : std_logic_vector((acc_mode_width - 1) downto 0); -- t_acc_mode;
+  signal s_acc_mode2         : std_logic_vector((acc_mode_width - 1) downto 0); -- t_acc_mode;
+  signal s_alu_select        : std_logic_vector((alu_select_width - 1) downto 0); -- t_alu_select;
   signal s_result1           : std_logic_vector((sig_width - 1) downto 0);
   signal s_result_acc1       : std_logic_vector((acc_width - 1) downto 0);
   signal s_result2           : std_logic_vector((sig_width - 1) downto 0);

@@ -77,6 +77,7 @@ package Bit_Manipulation is
 --	function bitbit_and(A : in unsigned; B : in unsigned) return unsigned;
 --	function bitbit_and(A : in signed; B : in signed) return signed;
 	function bitbit_and(A : in std_logic_vector; B : in std_logic_vector) return std_logic_vector;
+	-- function "or"(A, B : in std_logic_vector) return std_logic_vector;
 end Bit_Manipulation;
 
 package body Bit_Manipulation is
@@ -394,17 +395,17 @@ package body Bit_Manipulation is
 	  return yy;
 	end bitbit_and;
 
-	function bitbit_or(A : in std_logic_vector; B : in std_logic_vector) return std_logic_vector is
-	  constant L : natural := A'length;
-	  alias aa : std_logic_vector((L - 1) downto 0) is A;
-	  alias bb : std_logic_vector((L - 1) downto 0) is B;
-	  variable yy : std_logic_vector((L - 1) downto 0);
-	begin
-	  for i in L-1 downto 0 loop
-	    yy(i) := aa(i) or bb(i);
-	  end loop;
-	  return yy;
-	end bitbit_or;
+	-- function "or"(A, B : in std_logic_vector) return std_logic_vector is
+	--   constant L : natural := A'length;
+	--   alias aa : std_logic_vector((L - 1) downto 0) is A;
+	--   alias bb : std_logic_vector((L - 1) downto 0) is B;
+	--   variable yy : std_logic_vector((L - 1) downto 0);
+	-- begin
+	--   for i in L-1 downto 0 loop
+	--     yy(i) := aa(i) or bb(i);
+	--   end loop;
+	--   return yy;
+	-- end "or";
 
 end Bit_Manipulation;
 

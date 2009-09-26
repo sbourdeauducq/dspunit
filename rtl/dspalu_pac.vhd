@@ -34,6 +34,7 @@ package dspalu_pac is
   -- type t_acc_mode is (acc_store, acc_sumstore, acc_diff, acc_add, acc_sub, acc_back_add, acc_minback_add, acc_minback_sub);
   constant acc_mode_width  : natural := 4;
   -- alias t_acc_mode is std_logic_vector(3 downto 0);
+  constant acc_none        : std_logic_vector((acc_mode_width - 1) downto 0) := x"0";
   constant acc_store       : std_logic_vector((acc_mode_width - 1) downto 0) := x"1";
   constant acc_sumstore    : std_logic_vector((acc_mode_width - 1) downto 0) := x"2";
   constant acc_diff        : std_logic_vector((acc_mode_width - 1) downto 0) := x"3";

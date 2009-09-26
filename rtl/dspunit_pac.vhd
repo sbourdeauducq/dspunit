@@ -26,6 +26,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use ieee.math_real.all;
 use work.dspalu_pac.all;
+use work.bit_manipulation.all;
 -------------------------------------------------------------------------------
 
 package dspunit_pac is
@@ -107,26 +108,22 @@ package dspunit_pac is
     mul_in_b1      => (others => '0'),
     mul_in_a2      => (others => '0'),
     mul_in_b2      => (others => '0'),
-    acc_mode1      => acc_store,
-    acc_mode2      => acc_store,
-    alu_select     => alu_mul,
-    cmp_mode       => cmp_acc1,
+    acc_mode1      => acc_none,
+    acc_mode2      => acc_none,
+    alu_select     => alu_none,
+    cmp_mode       => cmp_none,
     cmp_pol        => '0',
-    cmp_store      => '1',
+    cmp_store      => '0',
     -- global counter
-    gcounter_reset => '1',
+    gcounter_reset => '0',
     -- shared lut
     lut_in         => (others => '0'),
     lut_select     => (others => '0')
     );
 
-    -- function "or" (a, b : t_dsp_bus) return t_dsp_bus is
-    --   t_dsp_bus y;
-    -- begin
-    --   -- y <= a or b;
+  function "or" (a, b : t_dsp_bus) return t_dsp_bus;
+  function "and" (a : std_logic_vector; b : std_logic) return std_logic_vector;
 
-    --   return y;
-    -- end "or";
 -------------------------------------------------------------------------------
 -- Register address
 -------------------------------------------------------------------------------
@@ -216,6 +213,53 @@ package body dspunit_pac is
 
     report msg.all;
   end dispsig;
+
+  function "or" (a, b : t_dsp_bus) return t_dsp_bus is
+    variable y : t_dsp_bus;
+  begin
+      -- y <= a or b;
+    y.op_done        := a.op_done        or b.op_done       ;
+    y.data_out_m0    := a.data_out_m0    or b.data_out_m0   ;
+    y.addr_r_m0      := a.addr_r_m0      or b.addr_r_m0     ;
+    y.addr_w_m0      := a.addr_w_m0      or b.addr_w_m0     ;
+    y.wr_en_m0       := a.wr_en_m0       or b.wr_en_m0      ;
+    y.c_en_m0        := a.c_en_m0        or b.c_en_m0       ;
+    y.data_out_m1    := a.data_out_m1    or b.data_out_m1   ;
+    y.addr_m1        := a.addr_m1        or b.addr_m1       ;
+    y.wr_en_m1       := a.wr_en_m1       or b.wr_en_m1      ;
+    y.c_en_m1        := a.c_en_m1        or b.c_en_m1       ;
+    y.data_out_m2    := a.data_out_m2    or b.data_out_m2   ;
+    y.addr_m2        := a.addr_m2        or b.addr_m2       ;
+    y.wr_en_m2       := a.wr_en_m2       or b.wr_en_m2      ;
+    y.c_en_m2        := a.c_en_m2        or b.c_en_m2       ;
+    y.mul_in_a1      := a.mul_in_a1      or b.mul_in_a1     ;
+    y.mul_in_b1      := a.mul_in_b1      or b.mul_in_b1     ;
+    y.mul_in_a2      := a.mul_in_a2      or b.mul_in_a2     ;
+    y.mul_in_b2      := a.mul_in_b2      or b.mul_in_b2     ;
+    y.acc_mode1      := a.acc_mode1      or b.acc_mode1     ;
+    y.acc_mode2      := a.acc_mode2      or b.acc_mode2     ;
+    y.alu_select     := a.alu_select     or b.alu_select    ;
+    y.cmp_mode       := a.cmp_mode       or b.cmp_mode      ;
+    y.cmp_pol        := a.cmp_pol        or b.cmp_pol       ;
+    y.cmp_store      := a.cmp_store      or b.cmp_store     ;
+    y.gcounter_reset := a.gcounter_reset or b.gcounter_reset;
+    y.lut_in         := a.lut_in         or b.lut_in        ;
+    y.lut_select     := a.lut_select     or b.lut_select    ;
+
+    return y;
+  end "or";
+
+  function "and" (a : std_logic_vector; b : std_logic) return std_logic_vector is
+    constant L : natural := a'length;
+    alias aa : std_logic_vector((L - 1) downto 0) is A;
+    variable yy : std_logic_vector((L - 1) downto 0);
+  begin
+    for i in L-1 downto 0 loop
+      yy(i) := aa(i) and b;
+    end loop;
+    return yy;
+  end "and";
+
 
 end dspunit_pac;
 

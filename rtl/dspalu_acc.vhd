@@ -226,7 +226,7 @@ begin  -- archs_dspalu_acc
   p_alu_ctrl : process (clk)
   begin  -- process p_alu_ctrl
     if rising_edge(clk) then            -- rising clock edge
-      if (alu_select = alu_mul) then
+      if (alu_select = alu_mul or alu_select = alu_none) then
         s_cmul_state <= cmul_end;
       elsif (s_cmul_state = cmul_step) then
         s_cmul_state <= cmul_end;

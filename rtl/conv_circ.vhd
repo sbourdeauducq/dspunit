@@ -76,31 +76,17 @@ begin  -- archs_conv_circ
         --s_dsp_bus <= c_dsp_bus_init;
         s_dsp_bus.op_done    <= '0';
         -- memory 0
---        s_dsp_bus.data_out_m0          <= (others => '0');
         s_dsp_bus.addr_r_m0  <= (others => '0');
-        s_dsp_bus.addr_w_m0  <= (others => '0');
-        s_dsp_bus.wr_en_m0   <= '0';
-        --s_dsp_bus.c_en_m0              <= '0';
         -- memory 1
---        s_dsp_bus.data_out_m1          <= (others => '0');
         s_dsp_bus.addr_m1    <= (others => '0');
         s_dsp_bus.wr_en_m1   <= '0';
-        --s_dsp_bus.c_en_m1              <= '0';
         -- memory 2
---        s_dsp_bus.data_out_m2          <= (others => '0');
         s_dsp_bus.addr_m2    <= (others => '0');
         s_dsp_bus.wr_en_m2   <= '0';
-        --s_dsp_bus.c_en_m2              <= '0';
         -- alu
-        --s_dsp_bus.mul_in_a1              <= (others <= '0');
-        --s_dsp_bus.mul_in_b1              <= (others <= '0');
-        --s_dsp_bus.mul_in_a2              <= (others <= '0');
-        --s_dsp_bus.mul_in_b2              <= (others <= '0');
-        s_dsp_bus.acc_mode1  <= acc_store;
-        s_dsp_bus.acc_mode2  <= acc_store;
-        s_dsp_bus.alu_select <= alu_mul;
+        s_dsp_bus.acc_mode1  <= acc_none;
+        s_dsp_bus.alu_select <= alu_none;
         -- global counter
-        --s_dsp_bus.gcounter_reset       <= '0';
         -------------------------------------------------------------------------------
         -- operation management
         -------------------------------------------------------------------------------
@@ -111,6 +97,8 @@ begin  -- archs_conv_circ
             s_dsp_bus.addr_m1   <= s_length;
             s_dsp_bus.addr_m2   <= (others => '0');
             s_dsp_bus.wr_en_m2  <= '0';
+            s_dsp_bus.acc_mode1 <= acc_store;
+            s_dsp_bus.alu_select <= alu_mul;
             if s_dsp_bus.op_done = '0' then
               s_state <= st_startpipe;
             end if;
@@ -172,17 +160,33 @@ begin  -- archs_conv_circ
   -----------------------------------------------------------------------------
   dsp_bus                  <= s_dsp_bus;
   -- multiplication of signals is made before accumulation
-  s_dsp_bus.mul_in_a1      <= data_in_m0;
-  s_dsp_bus.mul_in_b1      <= data_in_m1;
+  s_dsp_bus.mul_in_a1      <= data_in_m0 and op_en;
+  s_dsp_bus.mul_in_b1      <= data_in_m1 and op_en;
   s_conv_res               <= std_logic_vector(alu_result_acc1((sig_width - 1) downto 0));
-  s_dsp_bus.data_out_m2    <= s_conv_res;
-  s_dsp_bus.data_out_m0    <= s_conv_res;
-  s_dsp_bus.data_out_m1    <= s_conv_res;
-  s_dsp_bus.c_en_m0        <= '1';
-  s_dsp_bus.c_en_m1        <= '1';
-  s_dsp_bus.c_en_m2        <= '1';
-  s_dsp_bus.gcounter_reset <= '1';
+  s_dsp_bus.data_out_m2    <= s_conv_res and op_en;
+  s_dsp_bus.data_out_m0    <= s_conv_res and op_en;
+  s_dsp_bus.data_out_m1    <= s_conv_res and op_en;
+  s_dsp_bus.c_en_m0        <= op_en;
+  s_dsp_bus.c_en_m1        <= op_en;
+  s_dsp_bus.c_en_m2        <= op_en;
+  s_dsp_bus.gcounter_reset <= op_en;
   s_length                 <= unsigned(length_reg);
   test                     <= s_conv_res;
+
+
+  -- unused bus signals
+  -- memory 0
+  s_dsp_bus.addr_w_m0      <= (others => '0');
+  s_dsp_bus.wr_en_m0       <= '0';
+  -- alu
+  s_dsp_bus.mul_in_a2      <= (others => '0');
+  s_dsp_bus.mul_in_b2      <= (others => '0');
+  s_dsp_bus.acc_mode2      <= acc_none;
+  s_dsp_bus.cmp_mode       <= cmp_none;
+  s_dsp_bus.cmp_pol        <= '0';
+  s_dsp_bus.cmp_store      <= '0';
+  -- shared lut
+  s_dsp_bus.lut_in         <= (others => '0');
+  s_dsp_bus.lut_select     <= (others => '0');
 end archi_conv_circ;
 -------------------------------------------------------------------------------

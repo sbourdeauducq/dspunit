@@ -1,10 +1,7 @@
 [size] 1280 1000
-[pos] -4 -25
-*-26.054222 277900000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -1 -1
+*-26.037498 353600000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] dspunit_1.
-@28
-dspunit_1.s_runop
-dspunit_1.s_runop_sync
 @22
 dspunit_1.s_opcode_select[3:0]
 @200
@@ -114,3 +111,5 @@ gen_memory_2.data_a[15:0]
 gen_memory_2.q_a[15:0]
 @28
 gen_memory_2.wren_a
+@22
+dspunit_1.dspalu_acc_1.a1[15:0]

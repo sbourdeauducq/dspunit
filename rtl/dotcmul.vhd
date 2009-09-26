@@ -104,22 +104,7 @@ begin  -- archs_dotcmul
     if rising_edge(clk) then            -- rising clock edge
       if op_en = '0' then
         s_state            <= st_init;
-        --s_dsp_bus <= c_dsp_bus_init;
         s_dsp_bus.op_done  <= '0';
-        -- memory 0
---        s_dsp_bus.data_out_m0          <= (others => '0');
-        -- s_dsp_bus.addr_r_m0            <= (others => '0');
-        -- s_dsp_bus.addr_w_m0            <= (others => '0');
-        -- s_dsp_bus.wr_en_m0             <= '0';
-        --s_dsp_bus.c_en_m0              <= '0';
-        -- memory 1
---        s_dsp_bus.data_out_m1          <= (others => '0');
-        s_dsp_bus.wr_en_m1 <= '0';
-        --s_dsp_bus.c_en_m1              <= '0';
-        -- memory 2
---        s_dsp_bus.data_out_m2          <= (others => '0');
-        s_dsp_bus.addr_m2  <= (others => '0');
-        s_dsp_bus.wr_en_m2 <= '0';
         -------------------------------------------------------------------------------
         -- operation management
         -------------------------------------------------------------------------------
@@ -134,7 +119,6 @@ begin  -- archs_dotcmul
             -- In this state : reading, complex multiplication and writting
             -- are done concurently
             if s_sample_index = s_length then
-              --s_dsp_bus.wr_en_m1 <= '1';
               s_state <= st_copy;
             end if;
           when st_copy =>
@@ -160,9 +144,9 @@ begin  -- archs_dotcmul
         -- initial state is calculated as a function of pipeline depth
 --        s_datastate <= st_data_y1;
         s_datastate          <= st_data_y2;
-        s_dsp_bus.alu_select <= alu_mul;
-        s_dsp_bus.acc_mode1  <= acc_store;
-        s_dsp_bus.acc_mode2  <= acc_store;
+        s_dsp_bus.alu_select <= alu_none;
+        s_dsp_bus.acc_mode1  <= acc_none;
+        s_dsp_bus.acc_mode2  <= acc_none;
       else
         case s_datastate is
           when st_data_y1 =>
@@ -182,17 +166,24 @@ begin  -- archs_dotcmul
   p_dataload : process (clk)
   begin  -- process p_dataload
     if rising_edge(clk) then            -- rising clock edge
-      case s_datastate is
-        when st_data_y1 =>
-          s_data_u1_r <= data_in_m1;
-          s_data_y1_r <= data_in_m0;
-        when others =>                  -- st_data_y2
-          dispsig("sigcmul", to_integer(s_sample_index) + 1, to_integer(signed(s_data_y1_r)));
-          s_data_y1 <= s_data_y1_r;
-          s_data_y2 <= data_in_m0;
-          s_data_u2 <= data_in_m1;
-          s_data_u1 <= s_data_u1_r;
-      end case;
+      if op_en = '0' then
+        s_data_y1 <= (others => '0');
+        s_data_y2 <= (others => '0');
+        s_data_u2 <= (others => '0');
+        s_data_u1 <= (others => '0');
+      else
+        case s_datastate is
+          when st_data_y1 =>
+            s_data_u1_r <= data_in_m1;
+            s_data_y1_r <= data_in_m0;
+          when others =>                  -- st_data_y2
+            dispsig("sigcmul", to_integer(s_sample_index) + 1, to_integer(signed(s_data_y1_r)));
+            s_data_y1 <= s_data_y1_r;
+            s_data_y2 <= data_in_m0;
+            s_data_u2 <= data_in_m1;
+            s_data_u1 <= s_data_u1_r;
+        end case;
+      end if;
     end if;
   end process p_dataload;
   -------------------------------------------------------------------------------
@@ -201,18 +192,22 @@ begin  -- archs_dotcmul
   p_datastore : process (clk)
   begin  -- process p_datastore
     if rising_edge(clk) then            -- rising clock edge
-      s_datastate_n1 <= s_datastate;
-      case s_datastate_n1 is
-        when st_data_y1 =>
+      if op_en='0' then
+        s_dsp_bus.data_out_m0 <= (others => '0');
+      else
+        case s_datastate_n1 is
+          when st_data_y1 =>
           -- states y1, y2 inverted for writing because pipe length is odd
-          s_dsp_bus.data_out_m0 <= s_out_y1;
-          s_out_y2_r            <= s_out_y2;
-        when others =>                  -- st_data_y1
-          s_dsp_bus.data_out_m0 <= s_out_y2_r;
+            s_dsp_bus.data_out_m0 <= s_out_y1;
+            s_out_y2_r            <= s_out_y2;
+          when others =>                  -- st_data_y1
+            s_dsp_bus.data_out_m0 <= s_out_y2_r;
 
-          s_out_y1 <= result1;
-          s_out_y2 <= result2;
-      end case;
+            s_out_y1 <= result1;
+            s_out_y2 <= result2;
+        end case;
+      end if;
+      s_datastate_n1 <= s_datastate;
     end if;
   end process p_datastore;
   -------------------------------------------------------------------------------
@@ -253,10 +248,18 @@ begin  -- archs_dotcmul
       else
         s_wr_pipe(0) <= '0';
       end if;
-      for i in 0 to c_addr_pipe_depth - 2 loop
-        s_addr_pipe(i + 1) <= s_addr_pipe(i);
-        s_wr_pipe(i + 1)   <= s_wr_pipe(i);
-      end loop;
+      if op_en = '1' then
+        for i in 0 to c_addr_pipe_depth - 2 loop
+          s_addr_pipe(i + 1) <= s_addr_pipe(i);
+          s_wr_pipe(i + 1)   <= s_wr_pipe(i);
+        end loop;
+      else
+        -- Clear pipe when operation is not enabled
+        for i in 0 to c_addr_pipe_depth - 2 loop
+          s_addr_pipe(i + 1) <= (others => '0');
+          s_wr_pipe(i + 1)   <= '0';
+        end loop;
+      end if;
     end if;
   end process p_addr_pipe;
   --=---------------------------------------------------------------------------
@@ -265,12 +268,8 @@ begin  -- archs_dotcmul
   --
   -----------------------------------------------------------------------------
   dsp_bus                  <= s_dsp_bus;
-  s_dsp_bus.data_out_m2    <= (others => '0');
-  s_dsp_bus.data_out_m1    <= (others => '0');
-  s_dsp_bus.c_en_m0        <= '1';
-  s_dsp_bus.c_en_m1        <= '1';
-  s_dsp_bus.c_en_m2        <= '1';
-  s_dsp_bus.gcounter_reset <= '1';
+  s_dsp_bus.c_en_m0        <= op_en;
+  s_dsp_bus.c_en_m1        <= op_en;
   -- alu inputs
   s_dsp_bus.mul_in_a1      <= s_data_y1;
   s_dsp_bus.mul_in_a2      <= s_data_y2;
@@ -324,10 +323,15 @@ begin  -- archs_dotcmul
   p_addr_delay : process (clk)
   begin  -- process p_addr_pipe
     if rising_edge(clk) then            -- rising clock edge
-      s_dsp_bus.addr_r_m0 <= s_addr_r_m0_tmp;
+      if op_en = '0' then
+        s_dsp_bus.addr_r_m0 <= (others => '0');
+        s_dsp_bus.addr_m1 <= (others => '0');
+      else
+        s_dsp_bus.addr_r_m0 <= s_addr_r_m0_tmp;
 
-      s_dsp_bus.addr_m1 <= unsigned(bitbit_and(std_logic_vector(s_addr_r_m1_tmp),
-                                               std_logic_vector(s_mask_reg)));
+        s_dsp_bus.addr_m1 <= unsigned(bitbit_and(std_logic_vector(s_addr_r_m1_tmp),
+                             std_logic_vector(s_mask_reg)));
+      end if;
     end if;
   end process p_addr_delay;
 
@@ -343,5 +347,25 @@ begin  -- archs_dotcmul
   s_mask_reg    <= s_length_kern - 1;
 
 --  s_module <= module(signed(s_data_y1), signed(s_data_y2));
+
+  -- unused bus signals
+  -- memory 1
+  s_dsp_bus.data_out_m1    <= (others => '0');
+  s_dsp_bus.wr_en_m1       <= '0';
+  s_dsp_bus.c_en_m1        <= '0';
+  -- memory 2
+  s_dsp_bus.data_out_m2    <= (others => '0');
+  s_dsp_bus.addr_m2        <= (others => '0');
+  s_dsp_bus.wr_en_m2       <= '0';
+  s_dsp_bus.c_en_m2        <= '0';
+  -- alu
+  s_dsp_bus.cmp_mode       <= cmp_none;
+  s_dsp_bus.cmp_pol        <= '0';
+  s_dsp_bus.cmp_store      <= '0';
+  -- global counter
+  s_dsp_bus.gcounter_reset <= '0';
+  -- shared lut
+  s_dsp_bus.lut_in         <= (others => '0');
+  s_dsp_bus.lut_select     <= (others => '0');
 end archi_dotcmul;
 
