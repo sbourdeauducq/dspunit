@@ -170,7 +170,10 @@ architecture archi_dspunit of dspunit is
       clk        : in  std_logic;
       op_en      : in  std_logic;
       data_in_m0 : in  std_logic_vector((sig_width - 1) downto 0);
-      length_reg : in  std_logic_vector((cmdreg_width -1) downto 0);
+    data_in_m1 : in  std_logic_vector((sig_width - 1) downto 0);
+    data_in_m2 : in  std_logic_vector((sig_width - 1) downto 0);
+    length_reg : in  std_logic_vector((cmdreg_data_width -1) downto 0);
+    opflag_select   : in  std_logic_vector((opflag_width - 1) downto 0);
       dsp_bus    : out t_dsp_bus
       );
   end component;
@@ -366,7 +369,10 @@ begin  -- archs_dspunit
       clk        => clk,
       op_en      => s_op_cpmem_en,
       data_in_m0 => data_in_m0,
+      data_in_m1 => data_in_m1,
+      data_in_m2 => data_in_m2,
       length_reg => s_length0,          --s_dsp_cmdregs(DSPADDR_LENGTH0),
+      opflag_select   => s_opflag_select,
       dsp_bus    => s_dsp_bus_cpmem);
 
   fft_1 : fft

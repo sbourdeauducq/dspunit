@@ -173,6 +173,14 @@ package dspunit_pac is
   constant opflag_m2    : std_logic_vector((opflag_width - 1) downto 0) := "10000000";
   constant opflagbit_m2 : natural                                       := 7;
 
+  constant opflag_srcm0    : std_logic_vector((opflag_width - 1) downto 0) := "00000100";
+  constant opflagbit_srcm0 : natural                                       := 2;
+  constant opflag_srcm1    : std_logic_vector((opflag_width - 1) downto 0) := "00001000";
+  constant opflagbit_srcm1 : natural                                       := 3;
+  constant opflag_srcm2    : std_logic_vector((opflag_width - 1) downto 0) := "00010000";
+  constant opflagbit_srcm2 : natural                                       := 4;
+
+
 
 -- selection of math lut
   constant lutsel_none : std_logic_vector((lut_sel_width - 1) downto 0) := "0000";
