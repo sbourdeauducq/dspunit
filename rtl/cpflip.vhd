@@ -67,11 +67,32 @@ begin  -- archs_cpflip
         s_state              <= st_init;
         --s_dsp_bus <= c_dsp_bus_init;
         s_dsp_bus.op_done    <= '0';
+        -- memory 0
+--        s_dsp_bus.data_out_m0          <= (others => '0');
+        s_dsp_bus.addr_r_m0  <= (others => '0');
+        s_dsp_bus.addr_w_m0  <= (others => '0');
+        s_dsp_bus.wr_en_m0   <= '0';
+        --s_dsp_bus.c_en_m0              <= '0';
         -- memory 1
+--        s_dsp_bus.data_out_m1          <= (others => '0');
         s_dsp_bus.addr_m1    <= (others => '0');
         s_dsp_bus.wr_en_m1   <= '0';
+        --s_dsp_bus.c_en_m1              <= '0';
         -- memory 2
+--        s_dsp_bus.data_out_m2          <= (others => '0');
         s_dsp_bus.addr_m2    <= (others => '0');
+        s_dsp_bus.wr_en_m2   <= '0';
+        --s_dsp_bus.c_en_m2              <= '0';
+        -- alu
+        --s_dsp_bus.mul_in_a1              <= (others <= '0');
+        --s_dsp_bus.mul_in_b1              <= (others <= '0');
+        --s_dsp_bus.mul_in_a2              <= (others <= '0');
+        --s_dsp_bus.mul_in_b2              <= (others <= '0');
+        s_dsp_bus.acc_mode1  <= acc_store;
+        s_dsp_bus.acc_mode2  <= acc_store;
+        s_dsp_bus.alu_select <= alu_mul;
+        -- global counter
+        --s_dsp_bus.gcounter_reset       <= '0';
         -------------------------------------------------------------------------------
         -- operation management
         -------------------------------------------------------------------------------
@@ -111,37 +132,13 @@ begin  -- archs_cpflip
   --
   -----------------------------------------------------------------------------
   dsp_bus                  <= s_dsp_bus;
-  s_dsp_bus.data_out_m1    <= data_in_m2 and op_en;
-  s_dsp_bus.c_en_m1        <= op_en;
-  s_dsp_bus.c_en_m2        <= op_en;
-  s_length                 <= unsigned(length_reg);
-
-
-  -- unused bus signals
-  -- memory 0
-  s_dsp_bus.data_out_m0    <= (others => '0');
-  s_dsp_bus.addr_r_m0      <= (others => '0');
-  s_dsp_bus.addr_w_m0      <= (others => '0');
-  s_dsp_bus.wr_en_m0       <= '0';
-  s_dsp_bus.c_en_m0        <= '0';
-  -- memory 2
   s_dsp_bus.data_out_m2    <= (others => '0');
-  s_dsp_bus.wr_en_m2       <= '0';
-  -- alu
-  s_dsp_bus.mul_in_a1      <= (others => '0');
-  s_dsp_bus.mul_in_b1      <= (others => '0');
-  s_dsp_bus.mul_in_a2      <= (others => '0');
-  s_dsp_bus.mul_in_b2      <= (others => '0');
-  s_dsp_bus.acc_mode1      <= acc_none;
-  s_dsp_bus.acc_mode2      <= acc_none;
-  s_dsp_bus.alu_select     <= alu_none;
-  s_dsp_bus.cmp_mode       <= cmp_none;
-  s_dsp_bus.cmp_pol        <= '0';
-  s_dsp_bus.cmp_store      <= '0';
-  -- global counter
-  s_dsp_bus.gcounter_reset <= '0';
-  -- shared lut
-  s_dsp_bus.lut_in         <= (others => '0');
-  s_dsp_bus.lut_select     <= (others => '0');
+  s_dsp_bus.data_out_m0    <= (others => '0');
+  s_dsp_bus.data_out_m1    <= data_in_m2;
+  s_dsp_bus.c_en_m0        <= '0';
+  s_dsp_bus.c_en_m1        <= '1';
+  s_dsp_bus.c_en_m2        <= '1';
+  s_dsp_bus.gcounter_reset <= '1';
+  s_length                 <= unsigned(length_reg);
 end archi_cpflip;
 

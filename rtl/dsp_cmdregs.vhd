@@ -111,7 +111,8 @@ begin  -- archs_dsp_cmdregs
         end if;
         s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_LOADED) <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);
       end if;
-      data_out_cmdreg  <= s_dsp_cmdregs(to_integer(unsigned(addr_cmdreg)));
+      -- data_out_cmdreg  <= s_dsp_cmdregs(to_integer(unsigned(addr_cmdreg)));
+      data_out_cmdreg  <= s_dsp_cmdregs(DSPADDR_SR);
       s_op_done_sync   <= op_done;
       s_op_done_resync <= s_op_done_sync;
     end if;

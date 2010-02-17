@@ -126,6 +126,20 @@ begin  -- archs_fft
         s_state            <= st_init;
         --s_dsp_bus <= c_dsp_bus_init;
         s_dsp_bus.op_done  <= '0';
+        -- memory 0
+--        s_dsp_bus.data_out_m0          <= (others => '0');
+        -- s_dsp_bus.addr_r_m0            <= (others => '0');
+        -- s_dsp_bus.addr_w_m0            <= (others => '0');
+        -- s_dsp_bus.wr_en_m0             <= '0';
+        --s_dsp_bus.c_en_m0              <= '0';
+        -- memory 1
+--        s_dsp_bus.data_out_m1          <= (others => '0');
+        s_dsp_bus.wr_en_m1 <= '0';
+        --s_dsp_bus.c_en_m1              <= '0';
+        -- memory 2
+--        s_dsp_bus.data_out_m2          <= (others => '0');
+        s_dsp_bus.addr_m2  <= (others => '0');
+        s_dsp_bus.wr_en_m2 <= '0';
         s_wr_pipe_in       <= '0';
         -------------------------------------------------------------------------------
         -- operation management
@@ -152,6 +166,7 @@ begin  -- archs_fft
             -- if s_radix_half > s_length then
 --          if s_radix_count > s_length then
             if s_end_ft = '1' then
+              --s_dsp_bus.wr_en_m1 <= '1';
               s_state <= st_copy;
             end if;
             s_wr_pipe_in <= '1';
@@ -225,26 +240,22 @@ begin  -- archs_fft
   p_datastore : process (clk)
   begin  -- process p_datastore
     if rising_edge(clk) then            -- rising clock edge
-      if op_en='0' then
-        s_dsp_bus.data_out_m0 <= (others => '0');
-      else
-        case s_datastate_n2 is
-        --      case s_datastate is
-          when st_data_y1 =>
-          --        s_dsp_bus.data_out_m0 <= s_out_y1;
-          --        s_out_y2_r <= s_out_y2;
-            s_dsp_bus.data_out_m0 <= s_result1_shift;
-            s_out_y2_r            <= s_result2_shift;
-          when st_data_y2 =>
-            s_dsp_bus.data_out_m0 <= s_out_y2_r;
-          when st_data_u1 =>
+      case s_datastate_n2 is
+--      case s_datastate is
+        when st_data_y1 =>
+--        s_dsp_bus.data_out_m0 <= s_out_y1;
+--        s_out_y2_r <= s_out_y2;
+          s_dsp_bus.data_out_m0 <= s_result1_shift;
+          s_out_y2_r            <= s_result2_shift;
+        when st_data_y2 =>
+          s_dsp_bus.data_out_m0 <= s_out_y2_r;
+        when st_data_u1 =>
           -- s_out_u1_r <= s_out_u1;
-            s_out_u2_r            <= s_out_u2;
-            s_dsp_bus.data_out_m0 <= s_out_u1;
-          when st_data_u2 =>
-            s_dsp_bus.data_out_m0 <= s_out_u2_r;
-        end case;
-      end if;
+          s_out_u2_r            <= s_out_u2;
+          s_dsp_bus.data_out_m0 <= s_out_u1;
+        when st_data_u2 =>
+          s_dsp_bus.data_out_m0 <= s_out_u2_r;
+      end case;
     end if;
   end process p_datastore;
   -------------------------------------------------------------------------------
@@ -279,64 +290,54 @@ begin  -- archs_fft
   p_butterfly : process (clk)
   begin  -- process p_butterfly
     if rising_edge(clk) then            -- rising clock edge
-      if op_en='0' then
+      case s_datastate is
+        -- perform complex multiplication (step 1)
+        when st_data_y1 =>
+          s_dsp_bus.mul_in_a1  <= s_data_u1;
+          s_dsp_bus.mul_in_a2  <= s_data_u2;
+          s_dsp_bus.mul_in_b1  <= std_logic_vector(s_omega1);
+          s_dsp_bus.mul_in_b2  <= std_logic_vector(s_omega2);
+          s_dsp_bus.alu_select <= alu_cmul;
+          s_dsp_bus.acc_mode1  <= acc_store;
+          s_dsp_bus.acc_mode2  <= acc_store;
+          -- perform complex multiplication (step 2)
+        when st_data_y2 =>
+          s_dsp_bus.mul_in_a1  <= s_data_u1;
+          s_dsp_bus.mul_in_a2  <= s_data_u2;
+          s_dsp_bus.mul_in_b1  <= std_logic_vector(s_omega1);
+          s_dsp_bus.mul_in_b2  <= std_logic_vector(s_omega2);
+          s_dsp_bus.alu_select <= alu_cmul;
+          s_dsp_bus.acc_mode1  <= acc_store;
+          s_dsp_bus.acc_mode2  <= acc_store;
+          -- sum of the butterfly
+        when st_data_u1 =>
+          s_dsp_bus.mul_in_a1  <= s_data_y1;
+          s_dsp_bus.mul_in_a2  <= s_data_y2;
+--      s_dsp_bus.mul_in_b1 <= std_logic_vector(to_signed(1, sig_width));
+          --    s_dsp_bus.mul_in_b2 <= std_logic_vector(to_signed(1, sig_width));
+          s_dsp_bus.mul_in_b1  <= sig_cst_init(-0.99999);
+          s_dsp_bus.mul_in_b2  <= sig_cst_init(-0.99999);
+          s_dsp_bus.alu_select <= alu_mul;
+          s_dsp_bus.acc_mode1  <= acc_sub;
+          s_dsp_bus.acc_mode2  <= acc_sub;
+          -- substraction of the butterfly
+        when st_data_u2 =>
+          s_dsp_bus.mul_in_a1  <= s_data_y1;
+          s_dsp_bus.mul_in_a2  <= s_data_y2;
+          s_dsp_bus.mul_in_b1  <= sig_cst_init(-0.99999);
+          s_dsp_bus.mul_in_b2  <= sig_cst_init(-0.99999);
+          s_dsp_bus.alu_select <= alu_mul;
+          s_dsp_bus.acc_mode1  <= acc_minback_sub;
+          s_dsp_bus.acc_mode2  <= acc_minback_sub;
+        when others =>
           s_dsp_bus.mul_in_a1  <= (others => '0');
           s_dsp_bus.mul_in_a2  <= (others => '0');
           s_dsp_bus.mul_in_b1  <= (others => '0');
           s_dsp_bus.mul_in_b2  <= (others => '0');
-          s_dsp_bus.alu_select <= (others => '0');
-          s_dsp_bus.acc_mode1  <= (others => '0');
-          s_dsp_bus.acc_mode2  <= (others => '0');
-        else
-          case s_datastate is
-            -- perform complex multiplication (step 1)
-            when st_data_y1 =>
-              s_dsp_bus.mul_in_a1  <= s_data_u1;
-              s_dsp_bus.mul_in_a2  <= s_data_u2;
-              s_dsp_bus.mul_in_b1  <= std_logic_vector(s_omega1);
-              s_dsp_bus.mul_in_b2  <= std_logic_vector(s_omega2);
-              s_dsp_bus.alu_select <= alu_cmul;
-              s_dsp_bus.acc_mode1  <= acc_store;
-              s_dsp_bus.acc_mode2  <= acc_store;
-            -- perform complex multiplication (step 2)
-            when st_data_y2 =>
-              s_dsp_bus.mul_in_a1  <= s_data_u1;
-              s_dsp_bus.mul_in_a2  <= s_data_u2;
-              s_dsp_bus.mul_in_b1  <= std_logic_vector(s_omega1);
-              s_dsp_bus.mul_in_b2  <= std_logic_vector(s_omega2);
-              s_dsp_bus.alu_select <= alu_cmul;
-              s_dsp_bus.acc_mode1  <= acc_store;
-              s_dsp_bus.acc_mode2  <= acc_store;
-            -- sum of the butterfly
-            when st_data_u1 =>
-              s_dsp_bus.mul_in_a1  <= s_data_y1;
-              s_dsp_bus.mul_in_a2  <= s_data_y2;
-          --      s_dsp_bus.mul_in_b1 <= std_logic_vector(to_signed(1, sig_width));
-          --    s_dsp_bus.mul_in_b2 <= std_logic_vector(to_signed(1, sig_width));
-              s_dsp_bus.mul_in_b1  <= sig_cst_init(-0.99999);
-              s_dsp_bus.mul_in_b2  <= sig_cst_init(-0.99999);
-              s_dsp_bus.alu_select <= alu_mul;
-              s_dsp_bus.acc_mode1  <= acc_sub;
-              s_dsp_bus.acc_mode2  <= acc_sub;
-            -- substraction of the butterfly
-            when st_data_u2 =>
-              s_dsp_bus.mul_in_a1  <= s_data_y1;
-              s_dsp_bus.mul_in_a2  <= s_data_y2;
-              s_dsp_bus.mul_in_b1  <= sig_cst_init(-0.99999);
-              s_dsp_bus.mul_in_b2  <= sig_cst_init(-0.99999);
-              s_dsp_bus.alu_select <= alu_mul;
-              s_dsp_bus.acc_mode1  <= acc_minback_sub;
-              s_dsp_bus.acc_mode2  <= acc_minback_sub;
-            when others =>
-              s_dsp_bus.mul_in_a1  <= (others => '0');
-              s_dsp_bus.mul_in_a2  <= (others => '0');
-              s_dsp_bus.mul_in_b1  <= (others => '0');
-              s_dsp_bus.mul_in_b2  <= (others => '0');
-              s_dsp_bus.alu_select <= alu_mul;
-              s_dsp_bus.acc_mode1  <= acc_store;
-              s_dsp_bus.acc_mode2  <= acc_store;
-          end case;
-      end if;
+          s_dsp_bus.alu_select <= alu_mul;
+          s_dsp_bus.acc_mode1  <= acc_store;
+          s_dsp_bus.acc_mode2  <= acc_store;
+      end case;
     end if;
   end process p_butterfly;
   -------------------------------------------------------------------------------
@@ -418,11 +419,7 @@ begin  -- archs_fft
         end if;
       end if;
       -- Insert one pipe stage to trigo to sync with data from memory m0
-      if op_en = '1' then
-        s_angle_total <= std_logic_vector(s_angle + s_angle_offset);
-      else
-        s_angle_total <= (others => '0');
-      end if;
+      s_angle_total <= std_logic_vector(s_angle + s_angle_offset);
     end if;
   end process p_addr_comput;
   s_next_index <= s_butter_index + 1;
@@ -454,18 +451,10 @@ begin  -- archs_fft
       else
         s_wr_pipe(0) <= '0';
       end if;
-      if op_en = '1' then
-        for i in 0 to c_addr_pipe_depth - 2 loop
-          s_addr_pipe(i + 1) <= s_addr_pipe(i);
-          s_wr_pipe(i + 1)   <= s_wr_pipe(i);
-        end loop;
-      else
-        -- Clear pipe when operation not enabled
-        for i in 0 to c_addr_pipe_depth - 2 loop
-          s_addr_pipe(i + 1) <= (others => '0');
-          s_wr_pipe(i + 1)   <= '0';
-        end loop;
-      end if;
+      for i in 0 to c_addr_pipe_depth - 2 loop
+        s_addr_pipe(i + 1) <= s_addr_pipe(i);
+        s_wr_pipe(i + 1)   <= s_wr_pipe(i);
+      end loop;
     end if;
   end process p_addr_pipe;
 
@@ -484,7 +473,12 @@ begin  -- archs_fft
   --
   -----------------------------------------------------------------------------
   dsp_bus                  <= s_dsp_bus;
-  s_dsp_bus.c_en_m0        <= op_en;
+  s_dsp_bus.data_out_m2    <= (others => '0');
+  s_dsp_bus.data_out_m1    <= data_in_m2;
+  s_dsp_bus.c_en_m0        <= '1';
+  s_dsp_bus.c_en_m1        <= '1';
+  s_dsp_bus.c_en_m2        <= '1';
+  s_dsp_bus.gcounter_reset <= '1';
   -- Writing and reading address of the memory
   s_sample_index           <= s_butter_index + s_butter_group + s_butter_offset;
   s_sample_index_rev       <= bit_reverse(s_sample_index);
@@ -531,11 +525,7 @@ begin  -- archs_fft
   p_addr_delay : process (clk)
   begin  -- process p_shift_pipe
     if rising_edge(clk) then            -- rising clock edge
-      if op_en='0' then
-        s_dsp_bus.addr_r_m0 <= (others => '0');
-      else
-        s_dsp_bus.addr_r_m0 <= s_addr_r_m0_tmp;
-      end if;
+      s_dsp_bus.addr_r_m0 <= s_addr_r_m0_tmp;
     end if;
   end process;
 
@@ -551,28 +541,11 @@ begin  -- archs_fft
   -- trigonometry
   s_dsp_bus.lut_in((angle_width - 1) downto 0)            <= s_angle_total;
   s_dsp_bus.lut_in((lut_in_width - 1) downto angle_width) <= (others => '0');
-  s_dsp_bus.lut_select                                    <= lutsel_cos when op_en = '1' else lutsel_none;
+  s_dsp_bus.lut_select                                    <= lutsel_cos;
   -- shift control
   s_result1_shift                                         <= result1((sig_width - 1) downto 0) when s_shift_pipe(c_shiftflag_pipe_depth - 1) = '0'
                                                              else result1(sig_width downto 1);
   s_result2_shift <= result2((sig_width - 1) downto 0) when s_shift_pipe(c_shiftflag_pipe_depth - 1) = '0'
                      else result2(sig_width downto 1);
-  -- unused bus signals
-  -- memory 1
-  s_dsp_bus.data_out_m1    <= (others => '0');
-  s_dsp_bus.addr_m1        <= (others => '0');
-  s_dsp_bus.wr_en_m1       <= '0';
-  s_dsp_bus.c_en_m1        <= '0';
-  -- memory 2
-  s_dsp_bus.data_out_m2    <= (others => '0');
-  s_dsp_bus.addr_m2        <= (others => '0');
-  s_dsp_bus.wr_en_m2       <= '0';
-  s_dsp_bus.c_en_m2        <= '0';
-  -- alu
-  s_dsp_bus.cmp_mode       <= cmp_none;
-  s_dsp_bus.cmp_pol        <= '0';
-  s_dsp_bus.cmp_store      <= '0';
-  -- global counter
-  s_dsp_bus.gcounter_reset <= '0';
 end archi_fft;
 

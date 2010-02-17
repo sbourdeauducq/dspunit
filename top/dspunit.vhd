@@ -261,38 +261,6 @@ architecture archi_dspunit of dspunit is
   signal s_dsp_bus_sigshift    : t_dsp_bus;
   signal s_op_sigshift_en      : std_logic;
   signal s_chain_acc           : std_logic;
-
-
-  signal s_data_out_m0_conv_circ : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_a2_conv_circ : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_b1_conv_circ : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_b2_conv_circ : std_logic_vector((sig_width - 1) downto 0);
-  signal s_data_out_m0_sigshift  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_a2_sigshift  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_b1_sigshift  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_b2_sigshift  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_data_out_m0_dotcmul  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_a2_dotcmul  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_b1_dotcmul  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_b2_dotcmul  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_data_out_m0_cpmem  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_a2_cpmem  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_b1_cpmem  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_b2_cpmem  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_data_out_m0_cpflip  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_a2_cpflip  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_b1_cpflip  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_b2_cpflip  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_data_out_m0_fft  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_a2_fft  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_b1_fft  : std_logic_vector((sig_width - 1) downto 0);
-  signal s_mul_in_b2_fft  : std_logic_vector((sig_width - 1) downto 0);
-
-
-
-
-
-
 begin  -- archs_dspunit
   -----------------------------------------------------------------------------
   --
@@ -392,7 +360,6 @@ begin  -- archs_dspunit
 --        length_reg    => s_length0,--s_dsp_cmdregs(DSPADDR_LENGTH0),
 --        offset_reg    => s_length1,--s_dsp_cmdregs(DSPADDR_LENGTH1),
 --        dsp_bus       => s_dsp_bus_dotop);
-    s_dsp_bus_dotop <= c_dsp_bus_init;
 
   cpmem_1 : cpmem
     port map (
@@ -474,39 +441,15 @@ begin  -- archs_dspunit
   s_op_dotcmul_en   <= '1' when s_opcode_select = opcode_dotcmul   else '0';
   s_op_sigshift_en  <= '1' when s_opcode_select = opcode_sigshift  else '0';
   s_dsp_bus         <=
-    s_dsp_bus_conv_circ or -- when s_opcode_select = opcode_conv_circ else
-    s_dsp_bus_cpflip    or -- when s_opcode_select = opcode_cpflip    else
-    s_dsp_bus_dotop     or -- when s_opcode_select = opcode_dotop     else
-    s_dsp_bus_cpmem     or -- when s_opcode_select = opcode_cpmem     else
-    s_dsp_bus_fft       or -- when s_opcode_select = opcode_fft       else
-    s_dsp_bus_dotcmul   or -- when s_opcode_select = opcode_dotcmul   else
-    s_dsp_bus_sigshift;    -- when s_opcode_select = opcode_sigshift  else
-    -- c_dsp_bus_init;
+    s_dsp_bus_conv_circ when s_opcode_select = opcode_conv_circ else
+    s_dsp_bus_cpflip    when s_opcode_select = opcode_cpflip    else
+    s_dsp_bus_dotop     when s_opcode_select = opcode_dotop     else
+    s_dsp_bus_cpmem     when s_opcode_select = opcode_cpmem     else
+    s_dsp_bus_fft       when s_opcode_select = opcode_fft       else
+    s_dsp_bus_dotcmul   when s_opcode_select = opcode_dotcmul   else
+    s_dsp_bus_sigshift  when s_opcode_select = opcode_sigshift  else
+    c_dsp_bus_init;
 
-  s_data_out_m0_conv_circ <= s_dsp_bus_conv_circ.data_out_m0;
-  s_mul_in_a2_conv_circ <= s_dsp_bus_conv_circ.mul_in_a2;
-  s_mul_in_b1_conv_circ <= s_dsp_bus_conv_circ.mul_in_b1;
-  s_mul_in_b2_conv_circ <= s_dsp_bus_conv_circ.mul_in_b2;
-  s_data_out_m0_sigshift <= s_dsp_bus_sigshift.data_out_m0;
-  s_mul_in_a2_sigshift <= s_dsp_bus_sigshift.mul_in_a2;
-  s_mul_in_b1_sigshift <= s_dsp_bus_sigshift.mul_in_b1;
-  s_mul_in_b2_sigshift <= s_dsp_bus_sigshift.mul_in_b2;
-  s_data_out_m0_dotcmul <= s_dsp_bus_dotcmul.data_out_m0;
-  s_mul_in_a2_dotcmul <= s_dsp_bus_dotcmul.mul_in_a2;
-  s_mul_in_b1_dotcmul <= s_dsp_bus_dotcmul.mul_in_b1;
-  s_mul_in_b2_dotcmul <= s_dsp_bus_dotcmul.mul_in_b2;
-  s_data_out_m0_cpmem <= s_dsp_bus_cpmem.data_out_m0;
-  s_mul_in_a2_cpmem <= s_dsp_bus_cpmem.mul_in_a2;
-  s_mul_in_b1_cpmem <= s_dsp_bus_cpmem.mul_in_b1;
-  s_mul_in_b2_cpmem <= s_dsp_bus_cpmem.mul_in_b2;
-  s_data_out_m0_cpflip <= s_dsp_bus_cpflip.data_out_m0;
-  s_mul_in_a2_cpflip <= s_dsp_bus_cpflip.mul_in_a2;
-  s_mul_in_b1_cpflip <= s_dsp_bus_cpflip.mul_in_b1;
-  s_mul_in_b2_cpflip <= s_dsp_bus_cpflip.mul_in_b2;
-  s_data_out_m0_fft <= s_dsp_bus_fft.data_out_m0;
-  s_mul_in_a2_fft <= s_dsp_bus_fft.mul_in_a2;
-  s_mul_in_b1_fft <= s_dsp_bus_fft.mul_in_b1;
-  s_mul_in_b2_fft <= s_dsp_bus_fft.mul_in_b2;
 
   -------------------------------------------------------------------------------
   -- bus to output ports

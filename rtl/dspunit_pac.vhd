@@ -36,6 +36,7 @@ package dspunit_pac is
   constant cmdreg_data_width : positive := 16;
   constant cmdreg_width      : positive := 16;
   constant acc_width         : positive := 40;
+  constant acc_reduce_width  : positive := 30;
   constant lut_in_width      : positive := 13;
   constant lut_sel_width     : positive := 4;
   constant lut_out_width     : positive := sig_width;

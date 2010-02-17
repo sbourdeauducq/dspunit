@@ -28,7 +28,8 @@ use work.dspalu_pac.all;
 entity dspalu_acc is
   generic (
     sig_width : integer := 16;
-    acc_width : integer := 32);
+    acc_width : integer := 32;
+    acc_reduce_width : integer := 32);
   port (
     --@inputs
     a1          : in  std_logic_vector((sig_width - 1) downto 0);
@@ -78,6 +79,8 @@ architecture archi_dspalu_acc of dspalu_acc is
   signal s_back_acc2       : signed((acc_width - 1) downto 0);
   signal s_cmp_reg         : signed((acc_width - 1) downto 0);
   signal s_cmp_in          : signed((acc_width - 1) downto 0);
+  signal s_cmp_reg_r       : unsigned((acc_reduce_width - 2) downto 0);
+  signal s_cmp_in_r        : unsigned((acc_reduce_width - 2) downto 0);
   signal s_acc_mode1       : std_logic_vector((acc_mode_width - 1) downto 0); -- t_acc_mode;
   signal s_acc_mode2       : std_logic_vector((acc_mode_width - 1) downto 0); -- t_acc_mode;
   signal s_acc_mode1_n1    : std_logic_vector((acc_mode_width - 1) downto 0); -- t_acc_mode;
@@ -98,7 +101,9 @@ architecture archi_dspalu_acc of dspalu_acc is
   signal s_cmul_state      : t_cmul_state;
   signal s_result_sum      : signed((2*sig_width - 1) downto 0);
   signal s_cmp_greater     : std_logic;
+  signal s_cmp_greater_inreg     : std_logic;
   signal s_b2              : std_logic_vector((sig_width - 1) downto 0);
+  signal s_cmp_store       : std_logic;
 begin  -- archs_dspalu_acc
   -----------------------------------------------------------------------------
   --
@@ -191,32 +196,35 @@ begin  -- archs_dspalu_acc
           if(s_result_acc1(acc_width - 1) = '0') then
             s_cmp_in <= s_result_acc1;
           else
-            s_cmp_in <= -s_result_acc1;
+            s_cmp_in <= not s_result_acc1;
           end if;
         when cmp_acc2 =>
-          if(s_result_acc2(acc_width - 2) = '0') then
+          if(s_result_acc2(acc_width - 1) = '0') then
             s_cmp_in <= s_result_acc2;
           else
-            s_cmp_in <= -s_result_acc2;
+            s_cmp_in <= not s_result_acc2;
           end if;
         when others =>
           s_cmp_in <= (others => '0');
       end case;
-      if(s_cmp_reg < s_cmp_in) then
-        s_cmp_greater <= '1';
-      else
-        s_cmp_greater <= '0';
-      end if;
+      s_cmp_greater <= s_cmp_greater_inreg;
     end if;
   end process p_cmp_in;
+  s_cmp_reg_r <= unsigned(s_cmp_reg((acc_width - 2) downto (acc_width - acc_reduce_width))) ;
+  s_cmp_in_r <= unsigned(s_cmp_in((acc_width - 2) downto (acc_width - acc_reduce_width)));
+  s_cmp_greater_inreg <= '1' when s_cmp_reg_r < s_cmp_in_r else '0';
+  -- s_cmp_greater_inreg <= '1' when s_cmp_reg < s_cmp_in else '0';
   p_cmp : process (clk)
   begin  -- process p_cmp_in
     if rising_edge(clk) then            -- rising clock edge
-      if(((s_cmp_greater xor cmp_pol) or cmp_store) = '1') then
+      s_cmp_store <= cmp_store;
+      -- if(((s_cmp_greater_inreg xor cmp_pol) or s_cmp_store) = '1') then
+      if(s_cmp_store = '1') then
         s_cmp_reg <= s_cmp_in;
-        cmp_out   <= '1';
+      elsif(s_cmp_greater_inreg = '1') then
+        s_cmp_reg <= s_cmp_in;
       else
-        cmp_out <= '0';
+        s_cmp_reg <= s_cmp_reg;
       end if;
     end if;
   end process p_cmp;
