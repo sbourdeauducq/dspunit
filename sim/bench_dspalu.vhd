@@ -60,10 +60,10 @@ architecture archi_bench_dspalu of bench_dspalu is
       b2          : in  std_logic_vector((sig_width - 1) downto 0);
       clk         : in  std_logic;
       clr_acc     : in  std_logic;
-      acc_mode1                : in t_acc_mode;
-      acc_mode2                : in t_acc_mode;
-      alu_select               : in t_alu_select;
-      cmp_mode    : in  t_cmp_mode;
+      acc_mode1   : in  std_logic_vector((acc_mode_width - 1) downto 0);
+      acc_mode2   : in  std_logic_vector((acc_mode_width - 1) downto 0);
+      alu_select  : in  std_logic_vector((alu_select_width - 1) downto 0);
+      cmp_mode    : in  std_logic_vector((cmp_mode_width - 1) downto 0);
       cmp_pol     : in  std_logic;
       cmp_store   : in  std_logic;
       chain_acc   : in  std_logic;
@@ -94,7 +94,7 @@ architecture archi_bench_dspalu of bench_dspalu is
   signal s_result_acc1       : std_logic_vector((acc_width - 1) downto 0);
   signal s_result2           : std_logic_vector((sig_width - 1) downto 0);
   signal s_result_acc2       : std_logic_vector((acc_width - 1) downto 0);
-  signal s_cmp_mode          : t_cmp_mode;
+  signal s_cmp_mode          : std_logic_vector((cmp_mode_width - 1) downto 0);
   signal s_cmp_pol           : std_logic;
   signal s_cmp_store         : std_logic;
   signal s_chain_acc         : std_logic;
