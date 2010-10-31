@@ -269,4 +269,7 @@ begin  -- archs_bench_dspunit
    s_regbank_sel     <= '1';
  end archi_bench_dspunit;
 -------------------------------------------------------------------------------
-
+--   Simulation parameters
+-->SIMSTOPTIME=10000ns
+-->SIMSAVFILE=
+-------------------------------------------------------------------------------

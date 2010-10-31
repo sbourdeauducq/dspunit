@@ -249,4 +249,7 @@ begin  -- archs_bench_dspunit
                         '1' after 3871 ns, '0' after 3901 ns;
 end archi_bench_dspunit;
 -------------------------------------------------------------------------------
-
+--   Simulation parameters
+-->SIMSTOPTIME=10000ns
+-->SIMSAVFILE=
+-------------------------------------------------------------------------------

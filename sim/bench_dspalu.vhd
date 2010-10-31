@@ -159,4 +159,8 @@ begin  -- archs_bench_dspalu
    s_acc_mode2       <= acc_add, acc_store after 501 ns, acc_sub after 701 ns, acc_add after 901 ns;
    s_alu_select      <= alu_mul, alu_cmul after 501 ns;
  end archi_bench_dspalu;
+--------------------------------------------------------------------------------
+--   Simulation parameters
+-->SIMSTOPTIME=1000ns
+-->SIMSAVFILE=dspalu.sav
 -------------------------------------------------------------------------------

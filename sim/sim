@@ -1,14 +1,103 @@
-#!/bin/sh
+#!/bin/bash
+
+#Go to proper working directory
+###############################
 shdir=`echo $0|sed -e 's/\/[^\/]*$//'`
 echo "cd to $shdir"
 cd "$shdir"
-sed -i -e 's/^file "[^"]*"/file ""/' work/work-obj93.cf
+
+#Default values for simu
+#########################
+SIMSTOPTIME=1000000ns
+SIMSAVFILE=""
+
+#Get profile informations
+#########################
+PROFNAME=""
+if [ $# = 2 ]; then
+  if [ -f bench_$2.vhd ]; then
+    PROFNAME=$2
+    BENCH_NAME=bench_$PROFNAME.vhd
+
+    #Parse bench for meta info
+    egrep '^-->SIM' $BENCH_NAME|sed 's/^-->//' > .simpar.tmp
+    source .simpar.tmp
+    echo "Bench parameters of $PROFNAME : STOPTIME=$SIMSTOPTIME, SAVFILE=$SIMSAVFILE"
+  fi
+fi
+export PROFNAME
+
+#Synchronize the project file with ghdl
+#######################################
+egrep '^file' work/work-obj93.cf|\
+  sed -e 's/^file "[^"]*"/file ""/'|\
+  awk '{ a[NR]=$3 } END { for(i=NR; i--; i) print a[i+1] }'|\
+  sed 's/\"//g' > .vhdlist.tmp
+diff vhdlist .vhdlist.tmp > .difflist.tmp
+if [ ! $? = 0 ]; then
+  egrep '^<' .difflist.tmp|sed 's/^<\s*//' > .vhdlist.tmp
+  ghdl -i --workdir=work $(<.vhdlist.tmp)
+  if [ $? = 0 ]; then
+    egrep '^file' work/work-obj93.cf|\
+      sed -e 's/^file "[^"]*"/file ""/'|\
+      awk '{ a[NR]=$3 } END { for(i=NR; i--; i) print a[i+1] }'|\
+      sed 's/\"//g' > vhdlist
+  else
+    echo 'Error while analysing project file!'
+    exit
+  fi
+fi
+
+rm .*.tmp
+#######################################
+
+function check_prof
+{
+  if [ ! -n "$PROFNAME" ]; then
+    echo "A valid profile must be specified for the $1 operation"
+    echo "Usage:"
+    echo "sim build|clean|run|view PROFILENAME"
+    exit
+  fi
+}
+
 case $1 in
-    build ) ghdl -m -Wl,-lm --ieee=synopsys --workdir=work bench_$2;;
-    clean ) rm work/*.o;;
-    run ) ghdl -r bench_$2 --stop-time=35000ns --vcd=waves.vcd 2> sim.log;;
-    view ) gtkwave waves.vcd &;;
+    build ) 
+      check_prof build
+      echo "Build bench_$PROFNAME"
+      ghdl -m -Wl,-lm -fexplicit --ieee=synopsys --workdir=work "bench_$PROFNAME";;
+    clean ) 
+      if [ -n "$PROFNAME" ]; then
+        rm bench_$PROFNAME
+      fi
+      rm work/*.o;;
+    run ) 
+      check_prof run
+      echo "Run simulation of $PROFNAME over $SIMSTOPTIME"
+      ghdl -r bench_$PROFNAME --stop-time=$SIMSTOPTIME --vcd=waves_$PROFNAME.vcd 2> run_$PROFNAME.log;;
+    #run ) ghdl -r bench_$2 --stop-time=200000ns --wave=wave.ghw 2> run.log;;
+    view ) 
+      check_prof view
+      if [ -f $SIMSAVFILE ]; then
+        echo " view result of $PROFNAME with file $SIMSAVFILE"
+        gtkwave --save=$SIMSAVFILE waves_$PROFNAME.vcd &
+      else
+        echo " view result of $PROFNAME"
+        gtkwave waves_$PROFNAME.vcd &
+      fi
+      ;;
+    #view ) gtkwave waves.ghw &;;
+    add ) 
+      if [ ! -f $2 ]; then
+        echo "error : file $2 does not exist!"
+        exit
+      fi
+      echo "$2" >> vhdlist;;
+    ana ) ghdl -a --workdir=work "$2";;
+    msg ) 
+      check_prof msg
+      tail run_$PROFNAME.log;;
     * ) echo "Invalid args!"
-    echo "sim build|clean|run|view ext(bench)";;
+    echo "sim build|clean|run|view PROFILENAME";;
 esac
 
