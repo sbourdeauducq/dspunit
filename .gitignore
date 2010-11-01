@@ -1,0 +1,34 @@
+# #######################
+# Global ignore rules
+# some specific rules are
+# in subdirs
+# ########################
+
+
+# logs #
+#########
+*.log
+
+
+# ghdl files #
+##############
+*.vcd
+*.ghw
+bench_*
+# except source files of bench
+!bench_*.vhd
+work-obj93.cf
+work
+
+# Editors swap files #
+######################
+*.swp
+*~
+
+
+# Other various ignores #
+#########################
+ss.vim
+.grep.res
+cmd
+
