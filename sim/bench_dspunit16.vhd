@@ -175,7 +175,7 @@ begin  -- archs_bench_dspunit
     generic map (
 	  addr_width 	=> 16,
 	  data_width 	=> 16,
-	  init_file     => "MCFull64Comp.mif")
+	  init_file     => "exsig.mif")
     port map (
 	  address_a 	=> s_addr_r_m0,
 	  address_b 	=> s_addr_w_m0,
@@ -192,7 +192,7 @@ begin  -- archs_bench_dspunit
     generic map (
 	  addr_width 	=> 16,
 	  data_width 	=> 16,
-	  init_file     => "MCFull64Fft.mif")
+	  init_file     => "exsig_fft.mif")
     port map (
 	  address_a 	=> s_addr_m1,
 	  address_b 	=> (others => '0'),
