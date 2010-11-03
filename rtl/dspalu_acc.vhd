@@ -50,7 +50,6 @@ entity dspalu_acc is
     result_acc1 : out std_logic_vector((acc_width - 1) downto 0);
     result2     : out std_logic_vector((sig_width - 1) downto 0);
     result_acc2 : out std_logic_vector((acc_width - 1) downto 0);
-    result_sum  : out std_logic_vector((2*sig_width - 1) downto 0);
     cmp_reg     : out std_logic_vector((acc_width - 1) downto 0);
     cmp_greater : out std_logic;
     cmp_out     : out std_logic
@@ -99,7 +98,6 @@ architecture archi_dspalu_acc of dspalu_acc is
   signal s_mul_b2_in       : std_logic_vector((sig_width - 1) downto 0);
   type   t_cmul_state is (cmul_step, cmul_end);
   signal s_cmul_state      : t_cmul_state;
-  signal s_result_sum      : signed((2*sig_width - 1) downto 0);
   signal s_cmp_greater     : std_logic;
   signal s_cmp_greater_inreg     : std_logic;
   signal s_b2              : std_logic_vector((sig_width - 1) downto 0);
@@ -135,8 +133,6 @@ begin  -- archs_dspalu_acc
             s_result_acc1 <= s_result_acc1 - v_tmp_acc1;
           when acc_back_add =>
             s_result_acc1 <= s_back_acc1 + v_tmp_acc1;
-          when acc_minback_add =>
-            s_result_acc1 <= v_tmp_acc1 - s_back_acc1;
           when acc_minback_sub =>
             s_result_acc1 <= - v_tmp_acc1 - s_back_acc1;
           when others =>
@@ -172,8 +168,6 @@ begin  -- archs_dspalu_acc
             s_result_acc2 <= s_result_acc2 - v_tmp_acc2;
           when acc_back_add =>
             s_result_acc2 <= s_back_acc2 + v_tmp_acc2;
-          when acc_minback_add =>
-            s_result_acc2 <= v_tmp_acc2 - s_back_acc2;
           when acc_minback_sub =>
             s_result_acc2 <= - v_tmp_acc2 - s_back_acc2;
           when others =>
@@ -243,16 +237,6 @@ begin  -- archs_dspalu_acc
       end if;
     end if;
   end process p_alu_ctrl;
---  -------------------------------------------------------------------------------
---  -- Sum of products
---  -------------------------------------------------------------------------------
-  p_sum_reg : process (clk)
-  begin  -- process p_sum_reg
-    if rising_edge(clk) then            -- rising clock edge
-      s_result_sum <= s_result1 + s_result2;
-      --s_result_sum <= s_mul_out1 + s_mul_out2;
-    end if;
-  end process p_sum_reg;
 
   p_mul_reg : process (clk)
   begin  -- process p_mul_reg
@@ -274,12 +258,6 @@ begin  -- archs_dspalu_acc
   result2     <= std_logic_vector(s_result2((2*sig_width - 2) downto (sig_width - 1)));
   s_mul_out1  <= signed(s_mul_a1) * signed(s_mul_b1);
   s_mul_out2  <= signed(s_mul_a2) * signed(s_mul_b2);
---  s_mul_out1       <= signed(s_mul_a1(sig_width -1) & s_mul_a1 & zeros(sig_width - 1)) when s_mul_b1 = sig_one(sig_width) else
---                    signed(s_mul_b1(sig_width -1) & s_mul_b1 & zeros(sig_width - 1)) when s_mul_a1 = sig_one(sig_width) else
---                    signed(s_mul_a1) * signed(s_mul_b1);
---  s_mul_out2       <= signed(s_mul_a2(sig_width -1) & s_mul_a2 & zeros(sig_width - 1)) when s_mul_b2 = sig_one(sig_width) else
---                    signed(s_mul_b2(sig_width -1) & s_mul_b2 & zeros(sig_width - 1)) when s_mul_a2 = sig_one(sig_width) else
---                    signed(s_mul_a2) * signed(s_mul_b2);
   result_acc1 <= std_logic_vector(s_result_acc1);
   result_acc2 <= std_logic_vector(s_result_acc2);
 
@@ -306,8 +284,6 @@ begin  -- archs_dspalu_acc
   s_mul_b2_in <= b1                            when (s_cmul_state = cmul_end and (alu_select = alu_cmul or alu_select = alu_cmul_conj)) else s_b2;
   -- ------------------------------------------------------------------------------------------------------------------------
   s_b2        <= std_logic_vector(-signed(b2)) when alu_select = alu_cmul_conj                                                          else b2;
---  result_sum         <= (others => '0');
-  result_sum  <= std_logic_vector(s_result_sum);
   cmp_reg     <= std_logic_vector(s_cmp_reg);
   cmp_greater <= s_cmp_greater;
 end archi_dspalu_acc;

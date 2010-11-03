@@ -8,7 +8,6 @@ bench_dspalu.vhd
 ../rtl/dspunit_pac.vhd
 rompkg.vhd
 gen_memory.vhd
-../rtl/dotop.vhd
 ../rtl/setmem.vhd
 ../rtl/regBtoW.vhd
 bench_dspunit8.vhd

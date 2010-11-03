@@ -148,7 +148,6 @@ package dspunit_pac is
   constant opcode_width     : positive                                      := 4;
   constant opcode_conv_circ : std_logic_vector((opcode_width - 1) downto 0) := "0001";
   constant opcode_cpflip    : std_logic_vector((opcode_width - 1) downto 0) := "0010";
-  constant opcode_dotop     : std_logic_vector((opcode_width - 1) downto 0) := "0011";
   constant opcode_cpmem     : std_logic_vector((opcode_width - 1) downto 0) := "0100";
   constant opcode_setmem    : std_logic_vector((opcode_width - 1) downto 0) := "0101";
   constant opcode_sigshift  : std_logic_vector((opcode_width - 1) downto 0) := "0110";

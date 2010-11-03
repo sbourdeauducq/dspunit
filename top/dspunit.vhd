@@ -95,7 +95,6 @@ architecture archi_dspunit of dspunit is
       result_acc1 : out std_logic_vector((acc_width - 1) downto 0);
       result2     : out std_logic_vector((sig_width - 1) downto 0);
       result_acc2 : out std_logic_vector((acc_width - 1) downto 0);
-      result_sum  : out std_logic_vector((2*sig_width - 1) downto 0);
       cmp_reg     : out std_logic_vector((acc_width - 1) downto 0);
       cmp_greater : out std_logic;
       cmp_out     : out std_logic
@@ -147,24 +146,6 @@ architecture archi_dspunit of dspunit is
       dsp_bus    : out t_dsp_bus
       );
   end component;
---  component dotop
---    port (
---      clk                      : in std_logic;
---      op_en                    : in std_logic;
---      alu_result1              : in std_logic_vector((sig_width - 1) downto 0);
---      alu_result_acc1          : in std_logic_vector((acc_width - 1) downto 0);
---      alu_result2              : in std_logic_vector((sig_width - 1) downto 0);
---      alu_result_acc2          : in std_logic_vector((acc_width - 1) downto 0);
---      result_sum          : in std_logic_vector((2*sig_width - 1) downto 0);
---      data_in_m0               : in std_logic_vector((sig_width - 1) downto 0);
---      data_in_m1               : in std_logic_vector((sig_width - 1) downto 0);
---      data_in_m2               : in std_logic_vector((sig_width - 1) downto 0);
---      opcode                   : in std_logic_vector((cmdreg_width -1) downto 0);
---      length_reg               : in std_logic_vector((cmdreg_width -1) downto 0);
---      offset_reg               : in std_logic_vector((cmdreg_width -1) downto 0);
---      dsp_bus                  : out t_dsp_bus
---      );
---  end component;
   component cpmem
     port (
       clk        : in  std_logic;
@@ -233,7 +214,6 @@ architecture archi_dspunit of dspunit is
   signal s_alu_result_acc1     : std_logic_vector((acc_width - 1) downto 0);
   signal s_alu_result2         : std_logic_vector((sig_width - 1) downto 0);
   signal s_alu_result_acc2     : std_logic_vector((acc_width - 1) downto 0);
-  signal s_alu_result_sum      : std_logic_vector((2 * sig_width - 1) downto 0);
   signal s_op_conv_circ_en     : std_logic;
   signal s_opflag_select       : std_logic_vector((opflag_width - 1) downto 0);
   signal s_opcode_select       : std_logic_vector((opcode_width - 1) downto 0);
@@ -249,8 +229,6 @@ architecture archi_dspunit of dspunit is
   signal s_test                : std_logic_vector(15 downto 0);
   signal s_op_cpflip_en        : std_logic;
   signal s_dsp_bus_cpflip      : t_dsp_bus;
-  signal s_op_dotop_en         : std_logic;
-  signal s_dsp_bus_dotop       : t_dsp_bus;
   signal s_op_cpmem_en         : std_logic;
   signal s_dsp_bus_cpmem       : t_dsp_bus;
   signal s_op_fft_en           : std_logic;
@@ -292,7 +270,6 @@ begin  -- archs_dspunit
       result_acc1 => s_alu_result_acc1,
       result2     => s_alu_result2,
       result_acc2 => s_alu_result_acc2,
-      result_sum  => s_alu_result_sum,
       cmp_reg     => s_alu_cmp_reg,
       cmp_greater => s_cmp_greater,
       cmp_out     => s_alu_cmp_out);
@@ -346,23 +323,6 @@ begin  -- archs_dspunit
       data_in_m2 => data_in_m2,
       length_reg => s_length0,          --s_dsp_cmdregs(DSPADDR_LENGTH0),
       dsp_bus    => s_dsp_bus_cpflip);
-
---  dotop_1 : dotop
---    port map (
---        clk   => clk,
---        op_en         => s_op_dotop_en,
---        alu_result1   => s_alu_result1,
---        alu_result_acc1       => s_alu_result_acc1,
---        alu_result2   => s_alu_result2,
---        alu_result_acc2       => s_alu_result_acc2,
---        result_sum    => s_alu_result_sum,
---        data_in_m0    => data_in_m0,
---        data_in_m1    => data_in_m1,
---        data_in_m2    => data_in_m2,
---        opcode        => s_dsp_cmdregs(DSPADDR_OPCODE),
---        length_reg    => s_length0,--s_dsp_cmdregs(DSPADDR_LENGTH0),
---        offset_reg    => s_length1,--s_dsp_cmdregs(DSPADDR_LENGTH1),
---        dsp_bus       => s_dsp_bus_dotop);
 
   cpmem_1 : cpmem
     port map (
@@ -441,7 +401,6 @@ begin  -- archs_dspunit
   -------------------------------------------------------------------------------
   s_op_conv_circ_en <= '1' when s_opcode_select = opcode_conv_circ else '0';
   s_op_cpflip_en    <= '1' when s_opcode_select = opcode_cpflip    else '0';
-  s_op_dotop_en     <= '1' when s_opcode_select = opcode_dotop     else '0';
   s_op_cpmem_en     <= '1' when s_opcode_select = opcode_cpmem     else '0';
   s_op_fft_en       <= '1' when s_opcode_select = opcode_fft       else '0';
   s_op_dotcmul_en   <= '1' when s_opcode_select = opcode_dotcmul   else '0';
@@ -449,7 +408,6 @@ begin  -- archs_dspunit
   s_dsp_bus         <=
     s_dsp_bus_conv_circ when s_opcode_select = opcode_conv_circ else
     s_dsp_bus_cpflip    when s_opcode_select = opcode_cpflip    else
-    s_dsp_bus_dotop     when s_opcode_select = opcode_dotop     else
     s_dsp_bus_cpmem     when s_opcode_select = opcode_cpmem     else
     s_dsp_bus_fft       when s_opcode_select = opcode_fft       else
     s_dsp_bus_dotcmul   when s_opcode_select = opcode_dotcmul   else

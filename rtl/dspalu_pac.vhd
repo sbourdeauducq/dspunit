@@ -31,7 +31,7 @@ package dspalu_pac is
   function sig_one(size : natural) return signed;
   function sig_one(size : natural) return std_logic_vector;
 
-  -- type t_acc_mode is (acc_store, acc_sumstore, acc_diff, acc_add, acc_sub, acc_back_add, acc_minback_add, acc_minback_sub);
+  -- type t_acc_mode is (acc_store, acc_sumstore, acc_diff, acc_add, acc_sub, acc_back_add, acc_minback_sub);
   constant acc_mode_width  : natural := 4;
   -- alias t_acc_mode is std_logic_vector(3 downto 0);
   constant acc_none        : std_logic_vector((acc_mode_width - 1) downto 0) := x"0";
@@ -41,7 +41,6 @@ package dspalu_pac is
   constant acc_add         : std_logic_vector((acc_mode_width - 1) downto 0) := x"4";
   constant acc_sub         : std_logic_vector((acc_mode_width - 1) downto 0) := x"5";
   constant acc_back_add    : std_logic_vector((acc_mode_width - 1) downto 0) := x"6";
-  constant acc_minback_add : std_logic_vector((acc_mode_width - 1) downto 0) := x"7";
   constant acc_minback_sub : std_logic_vector((acc_mode_width - 1) downto 0) := x"8";
 
   -- type t_alu_select is (alu_add, alu_muladd, alu_mul, alu_cmul, alu_cmul_conj);
