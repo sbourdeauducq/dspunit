@@ -218,7 +218,7 @@ architecture archi_dspunit of dspunit is
       offset_result : in  std_logic_vector((cmdreg_data_width -1) downto 0);
       opflag_select   : in  std_logic_vector((opflag_width - 1) downto 0);
       result1        : in  std_logic_vector((sig_width - 1) downto 0);
-      result2        : in  std_logic_vector((sig_width - 1) downto 0);
+      result2        : in  std_logic_vector((2*sig_width - 1) downto 0);
       cmp_greater    : in  std_logic;
       dsp_bus    : out t_dsp_bus
 	);
@@ -405,7 +405,7 @@ begin  -- archs_dspunit
 	  offset_result 	=> s_length2,
 	  opflag_select 	=> s_opflag_select,
 	  result1 	=> s_alu_result_acc1((2*sig_width - 1) downto sig_width),
-	  result2 	=> s_alu_result_acc2((2*sig_width - 1) downto sig_width),
+	  result2 	=> s_alu_result_acc2((acc_width - 1) downto (acc_width - 2*sig_width)),
 	  cmp_greater 	=> s_cmp_greater,
 	  dsp_bus 	=> s_dsp_bus_dotopnorm);
 

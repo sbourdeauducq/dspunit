@@ -23,6 +23,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use work.dspalu_pac.all;
+use work.dsputil_pac.all;
 -------------------------------------------------------------------------------
 
 entity dspalu_acc is
@@ -162,6 +163,8 @@ begin  -- archs_dspalu_acc
           when acc_diff =>
 --          s_result_acc2 <= resize(signed(a2) + signed(b2), acc_width);
             s_result_acc2 <= s_result_acc2 - s_result_acc1;
+          when acc_abs =>
+            s_result_acc2 <= s_result_acc2 + dsp_abs(s_result_acc1);
           when acc_add =>
             s_result_acc2 <= s_result_acc2 + v_tmp_acc2;
           when acc_sub =>

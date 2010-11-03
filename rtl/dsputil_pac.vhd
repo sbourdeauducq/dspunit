@@ -18,53 +18,75 @@
 --   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 --   ----------------------------------------------------------------------
 
-
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 -------------------------------------------------------------------------------
 
-package dspalu_pac is
+package dsputil_pac is
 
+  function bit_extent(val : std_logic; size :natural) return std_logic_vector;
+  function dsp_abs(val : signed) return signed;
+  function dsp_abs(val : std_logic_vector) return std_logic_vector;
+  function ones(size   : natural) return unsigned;
+  function ones(size   : natural) return std_logic_vector;
   function zeros(size   : natural) return unsigned;
   function zeros(size   : natural) return std_logic_vector;
+  function sig_one(size : natural) return unsigned;
   function sig_one(size : natural) return signed;
   function sig_one(size : natural) return std_logic_vector;
 
-  -- type t_acc_mode is (acc_store, acc_sumstore, acc_diff, acc_add, acc_sub, acc_back_add, acc_minback_sub);
-  constant acc_mode_width  : natural := 4;
-  -- alias t_acc_mode is std_logic_vector(3 downto 0);
-  constant acc_none        : std_logic_vector((acc_mode_width - 1) downto 0) := x"0";
-  constant acc_store       : std_logic_vector((acc_mode_width - 1) downto 0) := x"1";
-  constant acc_sumstore    : std_logic_vector((acc_mode_width - 1) downto 0) := x"2";
-  constant acc_diff        : std_logic_vector((acc_mode_width - 1) downto 0) := x"3";
-  constant acc_add         : std_logic_vector((acc_mode_width - 1) downto 0) := x"4";
-  constant acc_sub         : std_logic_vector((acc_mode_width - 1) downto 0) := x"5";
-  constant acc_back_add    : std_logic_vector((acc_mode_width - 1) downto 0) := x"6";
-  constant acc_abs         : std_logic_vector((acc_mode_width - 1) downto 0) := x"7";
-  constant acc_minback_sub : std_logic_vector((acc_mode_width - 1) downto 0) := x"8";
-  constant acc_reset       : std_logic_vector((acc_mode_width - 1) downto 0) := x"F";
 
-  -- type t_alu_select is (alu_add, alu_muladd, alu_mul, alu_cmul, alu_cmul_conj);
-  -- alias t_alu_select is std_logic_vector(3 downto 0);
-  constant alu_select_width : natural := 4;
-  -- constant alu_add       : std_logic_vector(3 downto 0) := "0000";
-  constant alu_none      : std_logic_vector((alu_select_width - 1) downto 0) := "0000";
-  constant alu_muladd    : std_logic_vector((alu_select_width - 1) downto 0) := "0001";
-  constant alu_mul       : std_logic_vector((alu_select_width - 1) downto 0) := "0010";
-  constant alu_cmul      : std_logic_vector((alu_select_width - 1) downto 0) := "0100";
-  constant alu_cmul_conj : std_logic_vector((alu_select_width - 1) downto 0) := "1000";
+end dsputil_pac;
 
-  -- type t_cmp_mode is (cmp_acc1, cmp_acc2);
-  constant cmp_mode_width : natural := 2;
-  -- alias t_cmp_mode is std_logic_vector(1 downto 0);
-  constant cmp_none : std_logic_vector((cmp_mode_width - 1) downto 0) := "00";
-  constant cmp_acc1 : std_logic_vector((cmp_mode_width - 1) downto 0) := "01";
-  constant cmp_acc2 : std_logic_vector((cmp_mode_width - 1) downto 0) := "10";
+package body dsputil_pac is
 
-end dspalu_pac;
+  function bit_extent(val : std_logic; size :natural) return std_logic_vector
+  is
+    variable vect_out : std_logic_vector((size - 1) downto 0);
+  begin
+    vect_out := (others => val);
+    return vect_out;
+  end bit_extent;
 
-package body dspalu_pac is
+  function dsp_abs(val : signed) return signed
+  is
+    constant numlength : natural := val'length;
+    alias val_in : signed((numlength - 1) downto 0) is val;
+    variable val_out : signed((numlength - 1) downto 0);
+  begin
+    if val_in(numlength - 1) = '0' then
+      val_out := val_in;
+    else
+      val_out := -val_in;
+    end if;
+    return val_out;
+  end dsp_abs;
+
+  function dsp_abs(val : std_logic_vector) return std_logic_vector
+  is
+    constant numlength : natural := val'length;
+    variable val_out : std_logic_vector((numlength - 1) downto 0);
+  begin
+    val_out := std_logic_vector(dsp_abs(signed(val)));
+    return val_out;
+  end dsp_abs;
+
+  function ones(size : natural) return unsigned
+  is
+    variable vect_ones : unsigned((size - 1) downto 0);
+  begin
+    vect_ones := (others => '1');
+    return vect_ones;
+  end ones;
+
+  function ones(size : natural) return std_logic_vector
+  is
+    variable vect_ones : std_logic_vector((size - 1) downto 0);
+  begin
+    vect_ones := (others => '1');
+    return vect_ones;
+  end ones;
 
   function zeros(size : natural) return unsigned
   is
@@ -81,6 +103,15 @@ package body dspalu_pac is
     vect_zeros := (others => '0');
     return vect_zeros;
   end zeros;
+
+  function sig_one(size : natural) return unsigned
+  is
+    variable vect_one : unsigned((size - 1) downto 0);
+  begin
+    vect_one((size - 1) downto 0) := (others => '1');
+
+    return vect_one;
+  end sig_one;
 
   function sig_one(size : natural) return signed
   is
@@ -103,5 +134,5 @@ package body dspalu_pac is
   end sig_one;
 
 
-end dspalu_pac;
+end dsputil_pac;
 

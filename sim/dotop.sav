@@ -1,6 +1,7 @@
-[size] 1600 1127
-[pos] -4 -25
-*-29.573118 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[timestart] 949500000
+[size] 1272 967
+[pos] -1 -1
+*-24.573118 1024100000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] dspunit_1.
 @28
 s_clk
@@ -14,6 +15,17 @@ dspunit_1.addr_m1[15:0]
 dspunit_1.addr_m2[15:0]
 dspunit_1.addr_r_m0[15:0]
 dspunit_1.addr_w_m0[15:0]
+@28
+s_wr_en_m0
+s_wr_en_m1
+s_wr_en_m2
+@22
+s_data_out_m0[15:0]
+s_data_out_m1[15:0]
+s_data_out_m2[15:0]
+s_data_in_m0[15:0]
+s_data_in_m1[15:0]
+s_data_in_m2[15:0]
 @200
 -
 @28
@@ -21,3 +33,17 @@ dspunit_1.s_op_dotopnorm_en
 @22
 dspunit_1.dotopnorm_1.s_param1[15:0]
 dspunit_1.dotopnorm_1.s_param2[15:0]
+dspunit_1.dotopnorm_1.result1[15:0]
+@420
+dspunit_1.dotopnorm_1.result2[31:0]
+@421
+dspunit_1.dotopnorm_1.s_norm[31:0]
+@200
+-
+@22
+dspunit_1.dspalu_acc_1.acc_mode2[3:0]
+dspunit_1.dspalu_acc_1.result_acc1[39:0]
+dspunit_1.dspalu_acc_1.result_acc2[39:0]
+dspunit_1.dspalu_acc_1.s_result_acc1[39:0]
+dspunit_1.dspalu_acc_1.s_result_acc2[39:0]
+dspunit_1.dspalu_acc_1.s_acc_mode2[3:0]

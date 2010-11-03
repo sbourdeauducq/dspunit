@@ -178,7 +178,7 @@ begin  -- archs_bench_dotop
     generic map (
 	  addr_width 	=> 16,
 	  data_width 	=> 16,
-	  init_file     => "exsig.mif")
+	  init_file     => "sigl1.mif")
 --	  init_file     => "Ones.mif")
     port map (
 	  address_a 	=> s_addr_r_m0,
@@ -196,7 +196,7 @@ begin  -- archs_bench_dotop
     generic map (
 	  addr_width 	=> 16,
 	  data_width 	=> 16,
-	  init_file     => "exsig_fft.mif")
+	  init_file     => "sigl1.mif")
     port map (
 	  address_a 	=> s_addr_m1,
 	  address_b 	=> (others => '0'),
@@ -248,7 +248,7 @@ begin  -- archs_bench_dotop
                          "000010" after 22341 ns, "000100" after 22351 ns, "000111" after 22361 ns, "001000" after 22371 ns,
                          "000100" after 30861 ns, "000010" after 30871 ns, "000111" after 30881 ns, "001000" after 30891 ns;
   --s_data_in_cmdreg  <= x"0000", x"004F" after 141 ns, x"0040" after 151 ns, x"02D7" after 161 ns, x"0002" after 171 ns, -- dotop, muladd m0,1>m0
-  s_data_in_cmdreg  <= x"0000", x"0040" after 131 ns, x"004F" after 141 ns, x"0040" after 151 ns, x"02C7" after 161 ns, x"0002" after 171 ns, -- dotop, mul m0,1>m0
+  s_data_in_cmdreg  <= x"0000", x"0040" after 131 ns, x"004F" after 141 ns, x"0040" after 151 ns, x"02E7" after 161 ns, x"0002" after 171 ns, -- dotop, mul m0,1>m0
 --                         x"003F" after 8751 ns, x"002D" after 8761 ns, x"0002" after 8771 ns,	    -- dotcmul bitrev
                          x"0072" after 8741 ns, x"0080" after 8751 ns, x"0026" after 8761 ns, x"0002" after 8771 ns,	    -- sigshift bitrev
 			 x"0080" after 11321 ns,

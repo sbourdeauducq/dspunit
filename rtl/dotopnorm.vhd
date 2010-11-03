@@ -38,7 +38,7 @@ entity dotopnorm is
     offset_result : in  std_logic_vector((cmdreg_data_width -1) downto 0);
     opflag_select   : in  std_logic_vector((opflag_width - 1) downto 0);
     result1        : in  std_logic_vector((sig_width - 1) downto 0);
-    result2        : in  std_logic_vector((sig_width - 1) downto 0);
+    result2        : in  std_logic_vector((2*sig_width - 1) downto 0);
     cmp_greater    : in  std_logic;
     --@outputs;
     dsp_bus    : out t_dsp_bus
@@ -60,7 +60,7 @@ architecture archi_dotopnorm of dotopnorm is
   -- @signals definition
   -----------------------------------------------------------------------------
   signal s_dsp_bus : t_dsp_bus;
-  type   t_dotopnorm_state is (st_init, st_load_param1, st_load_param2, st_startpipe, st_compute, st_end);
+  type   t_dotopnorm_state is (st_init, st_load_param1, st_load_param2, st_startpipe, st_compute, st_getnorm, st_storenorm1, st_storenorm2);
   signal s_state   : t_dotopnorm_state;
   type t_state_pipe is array(0 to c_state_pipe_depth - 1) of t_dotopnorm_state;
   signal s_state_pipe : t_state_pipe;
@@ -75,6 +75,8 @@ architecture archi_dotopnorm of dotopnorm is
   signal s_param2            : std_logic_vector((sig_width - 1) downto 0);
   signal s_muladd_mode       : std_logic;
   signal s_data_out          : std_logic_vector((cmdreg_width - 1) downto 0);
+  signal s_norm              : std_logic_vector((2*sig_width - 1) downto 0);
+  signal s_wr_norm_en        : std_logic;
 begin  -- archs_dotopnorm
   -----------------------------------------------------------------------------
   --
@@ -100,6 +102,7 @@ begin  -- archs_dotopnorm
             s_addr_w   <= (others => '0');
             s_addr_r <= (others => '0');
             s_wr_en  <= '0';
+            s_wr_norm_en <= '0';
             if s_dsp_bus.op_done = '0' then
               s_state <= st_load_param1;
               s_addr_r <= unsigned(offset_params); -- addr to get first param
@@ -110,25 +113,39 @@ begin  -- archs_dotopnorm
           when st_load_param2 =>
             s_addr_r <= (others => '0');    -- init addr counter to start signal reading
             s_state <= st_startpipe;
+            s_dsp_bus.acc_mode2 <= acc_reset;
           when st_startpipe =>
             if s_addr_r = c_dotopnorm_pipe_depth - 1 then
               s_wr_en <= '1';
               s_state            <= st_compute;
             end if;
+            if s_addr_r = c_dotopnorm_pipe_depth - 3 then
+              s_dsp_bus.acc_mode2 <= acc_abs;
+            end if;
             s_addr_w <= (others => '0');    --  init addr counter to start signal write
             -- index increment
             s_addr_r <= s_addr_r + 1;
           when st_compute =>
-            s_wr_en <= '1';
-            if(s_addr_w = s_length) then
+            if(s_addr_w = s_length - 1) then
               s_wr_en <= '0';
-              s_state           <= st_end;
+              s_state           <= st_getnorm;
             else
               s_addr_r <= s_addr_r + 1;
               s_addr_w <= s_addr_w + 1; -- and s_length;
+              s_dsp_bus.acc_mode2 <= acc_abs;
+              s_wr_en <= '1';
             end if;
-          when st_end =>
+          when st_getnorm =>
+            s_norm <= result2;
+            s_state <= st_storenorm1;
+            s_addr_r <= unsigned(offset_params);
+            s_wr_norm_en <= opflag_select(opflagbit_l1norm);
+          when st_storenorm1 =>
+            s_state <= st_storenorm2;
+            s_addr_r <= unsigned(offset_params) + 1;
+          when st_storenorm2 =>
             s_wr_en <= '0';
+            s_wr_norm_en <= '0';
             s_state <= st_init;
             s_dsp_bus.op_done <= '1';
           when others => null;
@@ -166,15 +183,15 @@ begin  -- archs_dotopnorm
         s_dsp_bus.wr_en_m2 <= '0';
       elsif opflag_select(opflagbit_m0) = '1' then
         s_dsp_bus.wr_en_m0 <= s_wr_en;
-        s_dsp_bus.wr_en_m1 <= '0';
-        s_dsp_bus.wr_en_m2 <= '0';
+        s_dsp_bus.wr_en_m1 <= s_wr_norm_en and opflag_select(opflagbit_srcm1);
+        s_dsp_bus.wr_en_m2 <= s_wr_norm_en and opflag_select(opflagbit_srcm2);
       elsif opflag_select(opflagbit_m1) = '1' then
         s_dsp_bus.wr_en_m0 <= '0';
         s_dsp_bus.wr_en_m1 <= s_wr_en;
-        s_dsp_bus.wr_en_m2 <= '0';
+        s_dsp_bus.wr_en_m2 <= s_wr_norm_en;
       elsif opflag_select(opflagbit_m2) = '1' then
         s_dsp_bus.wr_en_m0 <= '0';
-        s_dsp_bus.wr_en_m1 <= '0';
+        s_dsp_bus.wr_en_m1 <= s_wr_norm_en;
         s_dsp_bus.wr_en_m2 <= s_wr_en;
       end if;
     end if;
@@ -265,6 +282,8 @@ begin  -- archs_dotopnorm
   begin -- process p_data_out_sel
     case s_state is
       when st_compute => s_data_out <= result1;
+      when st_storenorm1 => s_data_out <= s_norm((sig_width - 1) downto 0);
+      when st_storenorm2 => s_data_out <= s_norm((2*sig_width - 1) downto sig_width);
       when others => s_data_out <= (others => '0');
     end case;
   end process p_data_out_sel;

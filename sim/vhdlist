@@ -1,5 +1,4 @@
 bench_dotop.vhd
-../rtl/dsputil.vhd
 clock_gen.vhd
 ../rtl/dspalu_pac.vhd
 ../rtl/sigshift.vhd
@@ -24,3 +23,4 @@ rompkg.vhd
 bench_dspalu.vhd
 ../rtl/dspalu_acc.vhd
 ../rtl/dotopnorm.vhd
+../rtl/dsputil_pac.vhd
