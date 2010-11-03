@@ -1,0 +1,23 @@
+[size] 1600 1127
+[pos] -4 -25
+*-29.573118 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] dspunit_1.
+@28
+s_clk
+s_op_done
+s_reset
+s_wr_en_cmdreg
+@200
+-
+@22
+dspunit_1.addr_m1[15:0]
+dspunit_1.addr_m2[15:0]
+dspunit_1.addr_r_m0[15:0]
+dspunit_1.addr_w_m0[15:0]
+@200
+-
+@28
+dspunit_1.s_op_dotopnorm_en
+@22
+dspunit_1.dotopnorm_1.s_param1[15:0]
+dspunit_1.dotopnorm_1.s_param2[15:0]

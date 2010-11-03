@@ -126,6 +126,11 @@ package dspunit_pac is
   function "and" (a : std_logic_vector; b : std_logic) return std_logic_vector;
 
 -------------------------------------------------------------------------------
+-- General params
+-------------------------------------------------------------------------------
+  constant c_dspmem_pipe_depth : integer := 2;
+
+-------------------------------------------------------------------------------
 -- Register address
 -------------------------------------------------------------------------------
 
@@ -151,6 +156,7 @@ package dspunit_pac is
   constant opcode_cpmem     : std_logic_vector((opcode_width - 1) downto 0) := "0100";
   constant opcode_setmem    : std_logic_vector((opcode_width - 1) downto 0) := "0101";
   constant opcode_sigshift  : std_logic_vector((opcode_width - 1) downto 0) := "0110";
+  constant opcode_dotopnorm  : std_logic_vector((opcode_width - 1) downto 0) := "0111";
   constant opcode_fft       : std_logic_vector((opcode_width - 1) downto 0) := "1100";
   constant opcode_dotcmul   : std_logic_vector((opcode_width - 1) downto 0) := "1101";
 
@@ -164,6 +170,8 @@ package dspunit_pac is
   constant opflagbit_mainmem  : natural                                       := 1;
   constant opflag_savestep    : std_logic_vector((opflag_width - 1) downto 0) := "00001000";
   constant opflagbit_savestep : natural                                       := 3;
+  constant opflag_muladd    : std_logic_vector((opflag_width - 1) downto 0) := "00000001";
+  constant opflagbit_muladd : natural                                       := 0;
 
   constant opflag_m0    : std_logic_vector((opflag_width - 1) downto 0) := "00100000";
   constant opflagbit_m0 : natural                                       := 5;

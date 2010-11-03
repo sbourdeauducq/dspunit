@@ -264,6 +264,7 @@ begin  -- archs_dspalu_acc
   -- accumulation mode is given by acc_modex except during complex multiplication (modified for step 2)
   s_cmul_acc_mode1  <= acc_add          when acc_mode1 = acc_sub      else acc_sub;
   s_cmul_acc_mode2  <= acc_sub          when acc_mode1 = acc_sub      else acc_add;
+  -- TODO move the mux to s_acc_modeX_n1!!!!
   s_acc_mode1_inreg <= s_cmul_acc_mode1 when s_cmul_state = cmul_step else acc_mode1;
   s_acc_mode2_inreg <= s_cmul_acc_mode2 when s_cmul_state = cmul_step else acc_mode2;
 
