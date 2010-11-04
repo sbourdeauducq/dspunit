@@ -174,6 +174,10 @@ package dspunit_pac is
   constant opflagbit_muladd : natural                                       := 0;
   constant opflag_l1norm    : std_logic_vector((opflag_width - 1) downto 0) := "00000010";
   constant opflagbit_l1norm : natural                                       := 1;
+  constant opflag_tocomplex    : std_logic_vector((opflag_width - 1) downto 0) := "00000001";
+  constant opflagbit_tocomplex : natural                                       := 0;
+  constant opflag_fromcomplex    : std_logic_vector((opflag_width - 1) downto 0) := "00000010";
+  constant opflagbit_fromcomplex : natural                                       := 1;
 
   constant opflag_m0    : std_logic_vector((opflag_width - 1) downto 0) := "00100000";
   constant opflagbit_m0 : natural                                       := 5;

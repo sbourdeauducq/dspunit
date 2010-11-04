@@ -56,6 +56,8 @@ architecture archi_cpmem of cpmem is
   type   t_cpmem_state is (st_init, st_startpipe, st_copy);
   signal s_state   : t_cpmem_state;
   signal s_length  : unsigned((cmdreg_width - 1) downto 0);
+  signal s_addr_real_r            : unsigned((cmdreg_width - 1) downto 0);
+  signal s_addr_real_w            : unsigned((cmdreg_width - 1) downto 0);
   signal s_addr_r            : unsigned((cmdreg_width - 1) downto 0);
   signal s_addr_w            : unsigned((cmdreg_width - 1) downto 0);
   signal s_wr_en             : std_logic;
@@ -169,17 +171,17 @@ begin  -- archs_cpmem
         s_dsp_bus.c_en_m1 <= '0';
         s_dsp_bus.c_en_m2 <= '0';
       else
-        s_dsp_bus.addr_w_m0 <= s_addr_w;
-        s_dsp_bus.addr_r_m0 <= s_addr_r;
+        s_dsp_bus.addr_w_m0 <= s_addr_real_w;
+        s_dsp_bus.addr_r_m0 <= s_addr_real_r;
         if opflag_select(opflagbit_srcm1) = '1' then
-          s_dsp_bus.addr_m1 <= s_addr_r;
+          s_dsp_bus.addr_m1 <= s_addr_real_r;
         else
-          s_dsp_bus.addr_m1 <= s_addr_w;
+          s_dsp_bus.addr_m1 <= s_addr_real_w;
         end if;
         if opflag_select(opflagbit_srcm2) = '1' then
-          s_dsp_bus.addr_m2 <= s_addr_r;
+          s_dsp_bus.addr_m2 <= s_addr_real_r;
         else
-          s_dsp_bus.addr_m2 <= s_addr_w;
+          s_dsp_bus.addr_m2 <= s_addr_real_w;
         end if;
         s_dsp_bus.c_en_m0 <= opflag_select(opflagbit_srcm0) or opflag_select(opflagbit_m0);
         s_dsp_bus.c_en_m1 <= opflag_select(opflagbit_srcm1) or opflag_select(opflagbit_m1);
@@ -195,5 +197,9 @@ begin  -- archs_cpmem
   dsp_bus                  <= s_dsp_bus;
   s_dsp_bus.gcounter_reset <= '1';
   s_length                 <= unsigned(length_reg);
+  s_addr_real_w <= s_addr_w when opflag_select(opflagbit_tocomplex) = '0' else
+                   s_addr_w((cmdreg_width - 2) downto 0) & '0';
+  s_addr_real_r <= s_addr_r when opflag_select(opflagbit_fromcomplex) = '0' else
+                   s_addr_r((cmdreg_width - 2) downto 0) & '0';
 end archi_cpmem;
 
