@@ -35,6 +35,7 @@ egrep '^file' work/work-obj93.cf|\
   sed 's/\"//g' > .vhdlist.tmp
 diff vhdlist .vhdlist.tmp > .difflist.tmp
 if [ ! $? = 0 ]; then
+  echo 'updating vhdlist...'
   egrep '^<' .difflist.tmp|sed 's/^<\s*//' > .vhdlist.tmp
   ghdl -i --workdir=work $(<.vhdlist.tmp)
   if [ $? = 0 ]; then
@@ -78,7 +79,7 @@ case $1 in
     #run ) ghdl -r bench_$2 --stop-time=200000ns --wave=wave.ghw 2> run.log;;
     view ) 
       check_prof view
-      if [ -f $SIMSAVFILE ]; then
+      if [ -f "$SIMSAVFILE" ]; then
         echo " view result of $PROFNAME with file $SIMSAVFILE"
         gtkwave --save=$SIMSAVFILE waves_$PROFNAME.vcd &
       else
