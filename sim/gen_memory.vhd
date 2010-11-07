@@ -106,13 +106,15 @@ begin  -- archs_gen_memory
     end if;
   end process ramProc_b;
 
-  ramWrite : process (clock_a)
+  ramWrite : process (clock_a, clock_b)
   begin -- process ramWrite
     -- if rising_edge(s_w_clk) then  -- rising clock edge
-    if falling_edge(clock_a) then  -- rising clock edge
-      if wren_a = '1' then
+    if wren_a = '1' then
+      if falling_edge(clock_a) then  -- rising clock edge
         s_ram_block(to_integer(unsigned(address_a))) <= data_a;
-      elsif wren_b = '1' then
+      end if;
+    elsif wren_b = '1' then
+      if falling_edge(clock_b) then  -- rising clock edge
         s_ram_block(to_integer(unsigned(address_b))) <= data_b;
       end if;
     end if;
