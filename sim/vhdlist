@@ -1,3 +1,4 @@
+bench_div.vhd
 ../rtl/dsputil_pac.vhd
 ../rtl/dotopnorm.vhd
 ../rtl/dspalu_acc.vhd
@@ -25,3 +26,4 @@ bench_dspunit.vhd
 clock_gen.vhd
 bench_dotop.vhd
 bench_cpcomplex.vhd
+../rtl/dspdiv.vhd
