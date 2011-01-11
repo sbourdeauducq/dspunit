@@ -30,8 +30,8 @@ package dsputil_pac is
   function dsp_abs(val : std_logic_vector) return std_logic_vector;
   function ones(size   : natural) return unsigned;
   function ones(size   : natural) return std_logic_vector;
-  function zeros(size   : natural) return unsigned;
-  function zeros(size   : natural) return std_logic_vector;
+  -- function zeros(size   : natural) return unsigned;
+  -- function zeros(size   : natural) return std_logic_vector;
   function sig_one(size : natural) return unsigned;
   function sig_one(size : natural) return signed;
   function sig_one(size : natural) return std_logic_vector;
@@ -88,21 +88,21 @@ package body dsputil_pac is
     return vect_ones;
   end ones;
 
-  function zeros(size : natural) return unsigned
-  is
-    variable vect_zeros : unsigned((size - 1) downto 0);
-  begin
-    vect_zeros := (others => '0');
-    return vect_zeros;
-  end zeros;
+  -- function zeros(size : natural) return unsigned
+  -- is
+  --   variable vect_zeros : unsigned((size - 1) downto 0);
+  -- begin
+  --   vect_zeros := (others => '0');
+  --   return vect_zeros;
+  -- end zeros;
 
-  function zeros(size : natural) return std_logic_vector
-  is
-    variable vect_zeros : std_logic_vector((size - 1) downto 0);
-  begin
-    vect_zeros := (others => '0');
-    return vect_zeros;
-  end zeros;
+  -- function zeros(size : natural) return std_logic_vector
+  -- is
+  --   variable vect_zeros : std_logic_vector((size - 1) downto 0);
+  -- begin
+  --   vect_zeros := (others => '0');
+  --   return vect_zeros;
+  -- end zeros;
 
   function sig_one(size : natural) return unsigned
   is
