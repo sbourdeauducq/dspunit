@@ -223,6 +223,33 @@ architecture archi_dspunit of dspunit is
       dsp_bus    : out t_dsp_bus
 	);
   end component;
+  component dspdiv
+    generic (
+      sig_width : integer
+	);
+    port (
+      num         : in  std_logic_vector((2*sig_width - 1) downto 0);
+      den         : in  std_logic_vector((sig_width - 1) downto 0);
+      clk         : in  std_logic;
+    q                          : out std_logic_vector((sig_width - 1) downto 0);
+    r                          : out std_logic_vector((2*sig_width - 3) downto 0)
+	);
+  end component;
+  component dotdiv
+    port (
+      clk        : in  std_logic;
+      op_en      : in  std_logic;
+      data_in_m0 : in  std_logic_vector((sig_width - 1) downto 0);
+      data_in_m1 : in  std_logic_vector((sig_width - 1) downto 0);
+      data_in_m2 : in  std_logic_vector((sig_width - 1) downto 0);
+      length_reg : in  std_logic_vector((cmdreg_data_width -1) downto 0);
+      offset_result : in  std_logic_vector((cmdreg_data_width -1) downto 0);
+      num_shift  : in std_logic_vector((cmdreg_data_width - 1) downto 0);
+      opflag_select   : in  std_logic_vector((opflag_width - 1) downto 0);
+      div_q      : in std_logic_vector((sig_width - 1) downto 0);
+      dsp_bus    : out t_dsp_bus
+	);
+  end component;
   --=--------------------------------------------------------------------------
   -- @signals definition
   -----------------------------------------------------------------------------
@@ -260,7 +287,11 @@ architecture archi_dspunit of dspunit is
   signal s_op_sigshift_en      : std_logic;
   signal s_dsp_bus_dotopnorm    : t_dsp_bus;
   signal s_op_dotopnorm_en      : std_logic;
+  signal s_dsp_bus_dotdiv    : t_dsp_bus;
+  signal s_op_dotdiv_en      : std_logic;
   signal s_chain_acc           : std_logic;
+  signal s_div_q             : std_logic_vector((sig_width - 1) downto 0);
+  signal s_div_r             : std_logic_vector((2*sig_width - 3) downto 0);
 begin  -- archs_dspunit
   -----------------------------------------------------------------------------
   --
@@ -409,6 +440,30 @@ begin  -- archs_dspunit
 	  cmp_greater 	=> s_cmp_greater,
 	  dsp_bus 	=> s_dsp_bus_dotopnorm);
 
+  dspdiv_1 : dspdiv
+    generic map (
+	  sig_width 	=> sig_width)
+    port map (
+	  num 	=> s_dsp_bus.div_num,
+	  den 	=> s_dsp_bus.div_den,
+	  clk 	=> clk,
+	  q 	=> s_div_q,
+	  r 	=> s_div_r);
+
+  dotdiv_1 : dotdiv
+    port map (
+	  clk 	=> clk,
+	  op_en 	=> s_op_dotdiv_en,
+	  data_in_m0 	=> data_in_m0,
+	  data_in_m1 	=> data_in_m1,
+	  data_in_m2 	=> data_in_m2,
+	  length_reg 	=> s_length0,
+	  offset_result	=> s_length1,
+	  num_shift 	=> s_length2,
+	  opflag_select	=> s_opflag_select,
+	  div_q 	=> s_div_q,
+	  dsp_bus 	=> s_dsp_bus_dotdiv);
+
   --=---------------------------------------------------------------------------
   -------------------------------------------------------------------------------
   -- Global counter
@@ -441,6 +496,7 @@ begin  -- archs_dspunit
   s_op_dotcmul_en   <= '1' when s_opcode_select = opcode_dotcmul   else '0';
   s_op_sigshift_en  <= '1' when s_opcode_select = opcode_sigshift  else '0';
   s_op_dotopnorm_en  <= '1' when s_opcode_select = opcode_dotopnorm  else '0';
+  s_op_dotdiv_en  <= '1' when s_opcode_select = opcode_dotdiv  else '0';
   s_dsp_bus         <=
     s_dsp_bus_conv_circ when s_opcode_select = opcode_conv_circ else
     s_dsp_bus_cpflip    when s_opcode_select = opcode_cpflip    else
@@ -449,6 +505,7 @@ begin  -- archs_dspunit
     s_dsp_bus_dotcmul   when s_opcode_select = opcode_dotcmul   else
     s_dsp_bus_sigshift  when s_opcode_select = opcode_sigshift  else
     s_dsp_bus_dotopnorm  when s_opcode_select = opcode_dotopnorm  else
+    s_dsp_bus_dotdiv  when s_opcode_select = opcode_dotdiv  else
     c_dsp_bus_init;
 
 

@@ -42,6 +42,7 @@ package dspunit_pac is
   constant lut_out_width     : positive := sig_width;
   constant angle_width       : positive := 13;
 
+  constant div_pipe_length   : positive := sig_width + 1;
 
   function sig_cst_init(realval : real) return std_logic_vector;
   function module(a             : signed; b : signed) return integer;
@@ -79,6 +80,9 @@ package dspunit_pac is
     cmp_mode       : std_logic_vector((cmp_mode_width - 1) downto 0); -- t_cmp_mode;
     cmp_pol        : std_logic;
     cmp_store      : std_logic;
+    -- divider
+    div_num        : std_logic_vector((2*sig_width - 1) downto 0);
+    div_den        : std_logic_vector((sig_width - 1) downto 0);
     -- global counter
     gcounter_reset : std_logic;
     -- shared lut
@@ -115,6 +119,9 @@ package dspunit_pac is
     cmp_mode       => cmp_none,
     cmp_pol        => '0',
     cmp_store      => '0',
+    -- divider
+    div_num        => (others => '0'),
+    div_den        => (others => '0'),
     -- global counter
     gcounter_reset => '0',
     -- shared lut
@@ -157,6 +164,7 @@ package dspunit_pac is
   constant opcode_setmem    : std_logic_vector((opcode_width - 1) downto 0) := "0101";
   constant opcode_sigshift  : std_logic_vector((opcode_width - 1) downto 0) := "0110";
   constant opcode_dotopnorm  : std_logic_vector((opcode_width - 1) downto 0) := "0111";
+  constant opcode_dotdiv  : std_logic_vector((opcode_width - 1) downto 0) := "1000";
   constant opcode_fft       : std_logic_vector((opcode_width - 1) downto 0) := "1100";
   constant opcode_dotcmul   : std_logic_vector((opcode_width - 1) downto 0) := "1101";
 
@@ -192,6 +200,9 @@ package dspunit_pac is
   constant opflagbit_srcm1 : natural                                       := 3;
   constant opflag_srcm2    : std_logic_vector((opflag_width - 1) downto 0) := "00010000";
   constant opflagbit_srcm2 : natural                                       := 4;
+
+  constant opflag_srcswap  : std_logic_vector((opflag_width - 1) downto 0) := "00000010";
+  constant opflagbit_srcswap : natural                                     := 1;
 
 
 
@@ -264,6 +275,8 @@ package body dspunit_pac is
     y.cmp_mode       := a.cmp_mode       or b.cmp_mode      ;
     y.cmp_pol        := a.cmp_pol        or b.cmp_pol       ;
     y.cmp_store      := a.cmp_store      or b.cmp_store     ;
+    y.div_num        := a.div_num        or b.div_num       ;
+    y.div_den        := a.div_den        or b.div_den       ;
     y.gcounter_reset := a.gcounter_reset or b.gcounter_reset;
     y.lut_in         := a.lut_in         or b.lut_in        ;
     y.lut_select     := a.lut_select     or b.lut_select    ;
