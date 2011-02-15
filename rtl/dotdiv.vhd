@@ -68,7 +68,7 @@ architecture archi_dotdiv of dotdiv is
   signal s_data_a            : std_logic_vector((sig_width - 1) downto 0);
   signal s_data_b            : std_logic_vector((sig_width - 1) downto 0);
   signal s_div_num           : std_logic_vector((sig_width - 1) downto 0);
-  signal s_num_shift         : std_logic_vector(3 downto 0);
+  signal s_num_shift         : std_logic_vector(2 downto 0);
   signal s_div_den_next      : std_logic_vector((sig_width - 1) downto 0);
   signal s_div_num_next      : std_logic_vector((2*sig_width - 1) downto 0);
   signal s_num_sign          : std_logic;
@@ -141,6 +141,7 @@ begin  -- archs_dotdiv
       end case;
       s_dsp_bus.div_num <= s_div_num_next;
       s_dsp_bus.div_den <= s_div_den_next;
+      s_num_shift <= num_shift(2 downto 0);
     end if;
   end process p_data_select;
 
@@ -218,7 +219,6 @@ begin  -- archs_dotdiv
                        bit_extent(s_num_sign, 12) & s_div_num & zeros(sig_width - 12) when s_num_shift = x"6" else
                        bit_extent(s_num_sign, 14) & s_div_num & zeros(sig_width - 14) when s_num_shift = x"7";
   s_num_sign <= s_div_num(sig_width - 1);
-  s_num_shift <= num_shift(3 downto 0);
 
 
   dsp_bus                  <= s_dsp_bus;

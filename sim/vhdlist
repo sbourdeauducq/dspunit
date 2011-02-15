@@ -24,5 +24,6 @@ bench_dspalu.vhd
 ../rtl/setmem.vhd
 ../rtl/regBtoW.vhd
 bench_dspunit8.vhd
+bench_dotop.vhd
 bench_cpcomplex.vhd
 bench_dspunit.vhd
