@@ -250,7 +250,8 @@ begin  -- archs_bench_dspunit
                          "000100" after 30861 ns, "000010" after 30871 ns, "000111" after 30881 ns, "001000" after 30891 ns;
   s_data_in_cmdreg  <= x"0000", x"003F" after 141 ns, x"0040" after 151 ns, x"003C" after 161 ns, x"0002" after 171 ns, -- ifft bitrev
 --                         x"003F" after 8751 ns, x"002D" after 8761 ns, x"0002" after 8771 ns,	    -- dotcmul bitrev
-                         x"0072" after 8741 ns, x"0080" after 8751 ns, x"0026" after 8761 ns, x"0002" after 8771 ns,	    -- sigshift bitrev
+                         -- sigshift is not available any more
+                         -- x"0072" after 8741 ns, x"0080" after 8751 ns, x"0026" after 8761 ns, x"0002" after 8771 ns,	    -- sigshift bitrev
 			 x"0080" after 11321 ns,
                          x"0040" after 11341 ns, x"000F" after 11351 ns, x"000C" after 11361 ns, x"0002" after 11371 ns, -- fft
                          x"0040" after 19861 ns, x"0040" after 19871 ns, x"000D" after 19881 ns, x"0002" after 19891 ns,    -- dotcmul

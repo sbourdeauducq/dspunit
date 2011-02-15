@@ -3,7 +3,6 @@ gen_rom.vhd
 ../rtl/dotopnorm.vhd
 ../rtl/dotcmul.vhd
 ../rtl/cpmem.vhd
-../rtl/conv_circ.vhd
 ../rtl/dsp_cmdregs.vhd
 ../rtl/dsputil_pac.vhd
 gen_memory.vhd
@@ -18,7 +17,6 @@ clock_gen.vhd
 ../rtl/dsplut.vhd
 ../rtl/cpflip.vhd
 ../rtl/fft.vhd
-../rtl/sigshift.vhd
 ../rtl/dspdiv.vhd
 rompkg.vhd
 bench_div.vhd
