@@ -48,7 +48,7 @@ architecture archi_dotdiv of dotdiv is
   -----------------------------------------------------------------------------
   -- @constants definition
   -----------------------------------------------------------------------------
-  constant c_dotdiv_pipe_length        : integer := div_pipe_length + 5;
+  constant c_dotdiv_pipe_length        : integer := div_pipe_length + 4;
   --=--------------------------------------------------------------------------
   --
   -- @component declarations
