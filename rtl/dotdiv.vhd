@@ -68,7 +68,7 @@ architecture archi_dotdiv of dotdiv is
   signal s_data_a            : std_logic_vector((sig_width - 1) downto 0);
   signal s_data_b            : std_logic_vector((sig_width - 1) downto 0);
   signal s_div_num           : std_logic_vector((sig_width - 1) downto 0);
-  signal s_num_shift         : std_logic_vector(2 downto 0);
+  signal s_num_shift         : unsigned(2 downto 0);
   signal s_div_den_next      : std_logic_vector((sig_width - 1) downto 0);
   signal s_div_num_next      : std_logic_vector((2*sig_width - 1) downto 0);
   signal s_num_sign          : std_logic;
@@ -141,7 +141,7 @@ begin  -- archs_dotdiv
       end case;
       s_dsp_bus.div_num <= s_div_num_next;
       s_dsp_bus.div_den <= s_div_den_next;
-      s_num_shift <= num_shift(2 downto 0);
+      s_num_shift <= unsigned(num_shift(2 downto 0));
     end if;
   end process p_data_select;
 
@@ -210,14 +210,14 @@ begin  -- archs_dotdiv
   -- Divider input signals
   s_div_num <= s_data_a when opflag_select(opflagbit_srcswap) = '0' else s_data_b;
   s_div_den_next <= s_data_a when opflag_select(opflagbit_srcswap) = '1' else s_data_b;
-  s_div_num_next <= s_div_num & zeros(sig_width) when s_num_shift = x"0" else
-                       bit_extent(s_num_sign, 2) & s_div_num & zeros(sig_width - 2) when s_num_shift = x"1" else
-                       bit_extent(s_num_sign, 4) & s_div_num & zeros(sig_width - 4) when s_num_shift = x"2" else
-                       bit_extent(s_num_sign, 6) & s_div_num & zeros(sig_width - 6) when s_num_shift = x"3" else
-                       bit_extent(s_num_sign, 8) & s_div_num & zeros(sig_width - 8) when s_num_shift = x"4" else
-                       bit_extent(s_num_sign, 10) & s_div_num & zeros(sig_width - 10) when s_num_shift = x"5" else
-                       bit_extent(s_num_sign, 12) & s_div_num & zeros(sig_width - 12) when s_num_shift = x"6" else
-                       bit_extent(s_num_sign, 14) & s_div_num & zeros(sig_width - 14) when s_num_shift = x"7";
+  s_div_num_next <= s_div_num & zeros(sig_width) when to_integer(s_num_shift) = 0 else
+                       bit_extent(s_num_sign, 2) & s_div_num & zeros(sig_width - 2) when   to_integer(s_num_shift) = 1 else
+                       bit_extent(s_num_sign, 4) & s_div_num & zeros(sig_width - 4) when   to_integer(s_num_shift) = 2 else
+                       bit_extent(s_num_sign, 6) & s_div_num & zeros(sig_width - 6) when   to_integer(s_num_shift) = 3 else
+                       bit_extent(s_num_sign, 8) & s_div_num & zeros(sig_width - 8) when   to_integer(s_num_shift) = 4 else
+                       bit_extent(s_num_sign, 10) & s_div_num & zeros(sig_width - 10) when to_integer(s_num_shift) = 5 else
+                       bit_extent(s_num_sign, 12) & s_div_num & zeros(sig_width - 12) when to_integer(s_num_shift) = 6 else
+                       bit_extent(s_num_sign, 14) & s_div_num & zeros(sig_width - 14);-- when s_num_shift = x"7";
   s_num_sign <= s_div_num(sig_width - 1);
 
 
