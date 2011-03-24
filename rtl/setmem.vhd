@@ -101,6 +101,7 @@ begin  -- archs_setmem
             s_wr              <= '0';
             if s_dsp_bus.op_done = '0' then
               s_state <= st_set;
+              s_wr <= '1';
             end if;
           when st_set =>
             s_wr <= '1';
