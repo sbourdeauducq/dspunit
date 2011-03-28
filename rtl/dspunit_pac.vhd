@@ -44,6 +44,7 @@ package dspunit_pac is
   constant angle_width       : positive := 13;
 
   constant div_pipe_length   : positive := sig_width + 1;
+  constant c_dsp_pipe_length : positive := 4;
 
   function sig_cst_init(realval : real) return std_logic_vector;
   function module(a             : signed; b : signed) return integer;
@@ -157,6 +158,7 @@ package dspunit_pac is
   constant DSP_SRBIT_OPDONE : natural := 0;
   constant DSP_SRBIT_RUN    : natural := 1;
   constant DSP_SRBIT_LOADED : natural := 2;
+  constant DSP_SRBIT_UNUSED : natural := 3;
 
 -- opcodes of availables processings
   constant opcode_width     : positive                                      := 4;

@@ -29,11 +29,9 @@ use work.dspunit_pac.all;
 
 entity dsp_cmdregs is
   port (
-    --@inputs
     clk             : in  std_logic;
     clk_cpu         : in  std_logic;
     reset           : in  std_logic;
-    --@outputs;
     -- memory 0
     op_done         : in  std_logic;
     addr_cmdreg     : in  std_logic_vector((cmdreg_addr_width - 1) downto 0);
@@ -62,53 +60,61 @@ architecture archi_dsp_cmdregs of dsp_cmdregs is
   -- @component declarations
   --
   -----------------------------------------------------------------------------
+  component dsp_cmdpipe
+    port (
+      reset   : in  std_logic;
+      clk     : in  std_logic;
+      cmd_out : out t_dsp_cmdregs;
+      read    : in  std_logic;
+      empty   : out std_logic;
+      cmd_in  : in  t_dsp_cmdregs;
+      write   : in  std_logic;
+      full    : out std_logic
+      );
+  end component;
   --=--------------------------------------------------------------------------
   -- @signals definition
   -----------------------------------------------------------------------------
-  signal   s_dsp_cmdregs           : t_dsp_cmdregs;
-  signal   s_dsp_cmdregs_buf       : t_dsp_cmdregs;
-  signal   s_dsp_bus               : t_dsp_bus;
-  signal   s_dsp_bus_conv_circ     : t_dsp_bus;
-  signal   s_op_conv_circ_en       : std_logic;
-  signal   s_opflag_select_inreg   : std_logic_vector((opflag_width - 1) downto 0);
-  signal   s_opcode_select_inreg   : std_logic_vector((opcode_width - 1) downto 0);
-  signal   s_runop                 : std_logic;
-  signal   s_runop_sync            : std_logic;
-  signal   s_op_done_sync          : std_logic;
-  signal   s_op_done_resync        : std_logic;
-  signal   s_lut_out               : std_logic_vector((lut_out_width - 1) downto 0);
-  signal   s_refresh_cmdregs       : std_logic_vector((c_refresh_cmdreg_length - 1) downto 0);
-  signal   s_run_buf               : std_logic;
-  signal   s_refresh_cmdregs_in    : std_logic;
+  signal s_dsp_cmdregs         : t_dsp_cmdregs;
+  signal s_dsp_cmdregs_buf     : t_dsp_cmdregs;
+  signal s_dsp_cmdpipe_out     : t_dsp_cmdregs;
+  signal s_dsp_bus             : t_dsp_bus;
+  signal s_dsp_bus_conv_circ   : t_dsp_bus;
+  signal s_op_conv_circ_en     : std_logic;
+  signal s_opflag_select_inreg : std_logic_vector((opflag_width - 1) downto 0);
+  signal s_opcode_select_inreg : std_logic_vector((opcode_width - 1) downto 0);
+  signal s_op_run_resync       : std_logic;
+  signal s_op_run_sync         : std_logic;
+  signal s_op_done_sync        : std_logic;
+  signal s_op_done_resync      : std_logic;
+  signal s_lut_out             : std_logic_vector((lut_out_width - 1) downto 0);
+  signal s_load_pipe           : std_logic;
+  signal s_status_reg          : std_logic_vector((cmdreg_width - 1) downto 0);
+  signal s_read                : std_logic;
+  signal s_empty               : std_logic;
+  signal s_write               : std_logic;
+  signal s_full                : std_logic;
+  signal s_run_flag            : std_logic;
+  signal s_pipe_loaded         : std_logic;
+  signal s_op_run              : std_logic;
 begin  -- archs_dsp_cmdregs
   -----------------------------------------------------------------------------
   --
   -- @instantiations
   --
   -----------------------------------------------------------------------------
+  dsp_cmdpipe_1 : dsp_cmdpipe
+    port map (
+      reset   => reset,
+      clk     => clk_cpu,
+      cmd_out => s_dsp_cmdpipe_out,
+      read    => s_read,
+      empty   => s_empty,
+      cmd_in  => s_dsp_cmdregs_buf,
+      write   => s_write,
+      full    => s_full);
+
   --=---------------------------------------------------------------------------
-  -------------------------------------------------------------------------------
-  -- writing registers of the dspunit
-  -------------------------------------------------------------------------------
-  p_cmdreg : process (clk_cpu, reset)
-  begin  -- process p_cmdreg
-    if reset = '0' then
-      s_dsp_cmdregs <= dsp_cmdregs_init;
-    elsif rising_edge(clk_cpu) then     -- rising clock edge
-      if (s_refresh_cmdregs_in and s_refresh_cmdregs(3)) = '1' then
-        s_dsp_cmdregs <= s_dsp_cmdregs_buf;
-      elsif (s_refresh_cmdregs(3) = '0') then
-        if(s_op_done_resync = '1') then
-          s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_OPDONE) <= '1';
-          s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_RUN)    <= '0';
-        end if;
-        s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_LOADED) <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);
-      end if;
-      data_out_cmdreg  <= s_dsp_cmdregs(conv_integer(addr_cmdreg));
-      s_op_done_sync   <= op_done;
-      s_op_done_resync <= s_op_done_sync;
-    end if;
-  end process p_cmdreg;
   -------------------------------------------------------------------------------
   -- Register bank accessibel from controler
   -------------------------------------------------------------------------------
@@ -119,29 +125,70 @@ begin  -- archs_dsp_cmdregs
     elsif rising_edge(clk_cpu) then     -- rising clock edge
       if(wr_en_cmdreg = '1') then
         s_dsp_cmdregs_buf(conv_integer(addr_cmdreg)) <= data_in_cmdreg;
-      elsif((s_refresh_cmdregs(3) and s_refresh_cmdregs(0)) = '1') then
-        s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN) <= '0';
+      else
+        s_dsp_cmdregs_buf(DSPADDR_SR) <= s_status_reg;
       end if;
-      -- Pipeline to generate a delay before refresh cmdregs
-      s_refresh_cmdregs(0) <= s_refresh_cmdregs_in;
-      for i in c_refresh_cmdreg_length - 2 downto 0 loop
-        s_refresh_cmdregs(i + 1) <= s_refresh_cmdregs(i);
-      end loop;
+      data_out_cmdreg <= s_dsp_cmdregs_buf(conv_integer(addr_cmdreg));
     end if;
   end process p_cmdreg_buf;
-  debug                <= s_dsp_cmdregs(DSPADDR_SR);
-  s_run_buf            <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);
-  s_refresh_cmdregs_in <= (not s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_RUN)) and s_run_buf;
+  -------------------------------------------------------------------------------
+  -- Bits of status register (readable from cpu)
+  -------------------------------------------------------------------------------
+  s_status_reg(DSP_SRBIT_LOADED)                         <= not s_full;
+  s_status_reg(DSP_SRBIT_OPDONE)                         <= s_op_done_resync;
+  s_status_reg(DSP_SRBIT_RUN)                            <= s_run_flag and (not s_load_pipe);
+  s_status_reg(cmdreg_width - 1 downto DSP_SRBIT_UNUSED) <= (others => '0');
+  s_run_flag                                             <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);
+  -------------------------------------------------------------------------------
+  -- Control injection of datas in pipe
+  -------------------------------------------------------------------------------
+  p_ctrl_pipe : process (clk_cpu)
+  begin  -- process p_cmdreg_buf
+    if rising_edge(clk_cpu) then        -- rising clock edge
+      if s_load_pipe = '1' then
+        s_write       <= '1';
+        s_pipe_loaded <= '1';
+      elsif s_run_flag = '0' then
+        s_pipe_loaded <= '0';
+        s_write       <= '0';
+      else
+        s_write <= '0';
+      end if;
+    end if;
+  end process p_ctrl_pipe;
+  s_load_pipe <= s_run_flag and (not s_pipe_loaded) and (not s_full);
+  -------------------------------------------------------------------------------
+  -- Control the pipe output
+  -------------------------------------------------------------------------------
+  p_pipe_out : process (clk_cpu, reset)
+  begin  -- process p_pipe_out
+    if reset = '0' then
+      s_op_run <= '0';
+    elsif rising_edge(clk) then         -- rising clock edge
+      if s_op_done_resync = '1' then
+        s_op_run <= '0';
+        s_read   <= '0';
+      elsif s_op_run = '0' and s_empty = '0' then
+        s_read        <= '1';
+        s_op_run      <= '1';
+        s_dsp_cmdregs <= s_dsp_cmdpipe_out;
+      else
+        s_read <= '0';
+      end if;
+      s_op_done_sync   <= op_done;
+      s_op_done_resync <= s_op_done_sync;
+    end if;
+  end process p_pipe_out;
   -------------------------------------------------------------------------------
   -- Synchronization of command signals to the dspunit clock
   -------------------------------------------------------------------------------
   p_synccmd : process (clk)
   begin  -- process p_synccmd
     if rising_edge(clk) then            -- rising clock edge
-      s_runop_sync <= s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_RUN);
-      s_runop      <= s_runop_sync;
-      -- cmdregs can be considered as stable when s_runop='1'
-      if s_runop = '1' then
+      s_op_run_sync   <= s_op_run;
+      s_op_run_resync <= s_op_run_sync;
+      -- cmdregs can be considered as stable when s_op_run_resync='1'
+      if s_op_run_resync = '1' then
         s_opcode_select_inreg <= s_dsp_cmdregs(DSPADDR_OPCODE)((opcode_width - 1) downto 0);
         s_opflag_select_inreg <= s_dsp_cmdregs(DSPADDR_OPCODE)((opflag_width + opcode_width - 1) downto (opcode_width));
       else
@@ -164,5 +211,6 @@ begin  -- archs_dsp_cmdregs
   -- @concurrent signal assignments
   --
   -----------------------------------------------------------------------------
+  debug <= s_dsp_cmdregs(DSPADDR_SR);
 end archi_dsp_cmdregs;
 -------------------------------------------------------------------------------
