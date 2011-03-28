@@ -35,6 +35,7 @@ package dspunit_pac is
   constant cmdreg_addr_width : natural  := 6;
   constant cmdreg_data_width : positive := 16;
   constant cmdreg_width      : positive := 16;
+  constant cmdregs_length    : positive := 16;
   constant acc_width         : positive := 40;
   constant acc_reduce_width  : positive := 30;
   constant lut_in_width      : positive := 13;
@@ -49,7 +50,7 @@ package dspunit_pac is
   procedure dispsig(name        : string; ind : integer; val : integer);
 
 --type t_dsp_cmdregs is array (0 to ((2**cmdreg_addr_width) - 1)) of std_logic_vector((cmdreg_width - 1) downto 0);
-  type t_dsp_cmdregs is array (0 to 15) of std_logic_vector((cmdreg_width - 1) downto 0);
+  type t_dsp_cmdregs is array (0 to cmdregs_length - 1) of std_logic_vector((cmdreg_width - 1) downto 0);
   type t_dsp_bus is
   record
     op_done        : std_logic;
@@ -132,6 +133,7 @@ package dspunit_pac is
   function "or" (a, b : t_dsp_bus) return t_dsp_bus;
   function "and" (a : std_logic_vector; b : std_logic) return std_logic_vector;
 
+  function dsp_cmdregs_init return t_dsp_cmdregs;
 -------------------------------------------------------------------------------
 -- General params
 -------------------------------------------------------------------------------
@@ -293,6 +295,14 @@ package body dspunit_pac is
     return yy;
   end "and";
 
+  function dsp_cmdregs_init return t_dsp_cmdregs is
+    variable regs : t_dsp_cmdregs;
+  begin
+    for i in 0 to cmdregs_length - 1 loop
+      regs(i) := (others => '0');
+    end loop;
+    return regs;
+  end dsp_cmdregs_init;
 
 end dspunit_pac;
 

@@ -21,6 +21,7 @@
 
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.std_logic_unsigned.all;
 use ieee.numeric_std.all;
 use work.dspalu_pac.all;
 use work.dspunit_pac.all;
@@ -92,45 +93,34 @@ begin  -- archs_dsp_cmdregs
   p_cmdreg : process (clk_cpu, reset)
   begin  -- process p_cmdreg
     if reset = '0' then
-      --for i in 0 to (2**cmdreg_addr_width - 1) loop
-      for i in 0 to 15 loop
-        s_dsp_cmdregs(i) <= (others => '0');
-      end loop;
+      s_dsp_cmdregs <= dsp_cmdregs_init;
     elsif rising_edge(clk_cpu) then     -- rising clock edge
---      if(wr_en_cmdreg = '1') then
---        s_dsp_cmdregs(to_integer(unsigned(addr_cmdreg))) <= data_in_cmdreg;
       if (s_refresh_cmdregs_in and s_refresh_cmdregs(3)) = '1' then
-        for i in 0 to 15 loop
-          s_dsp_cmdregs(i) <= s_dsp_cmdregs_buf(i);
-        end loop;
+        s_dsp_cmdregs <= s_dsp_cmdregs_buf;
       elsif (s_refresh_cmdregs(3) = '0') then
         if(s_op_done_resync = '1') then
           s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_OPDONE) <= '1';
---      if(s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_OPDONE) = 1) then
           s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_RUN)    <= '0';
         end if;
         s_dsp_cmdregs(DSPADDR_SR)(DSP_SRBIT_LOADED) <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);
       end if;
-      -- data_out_cmdreg  <= s_dsp_cmdregs(to_integer(unsigned(addr_cmdreg)));
-      data_out_cmdreg  <= s_dsp_cmdregs(DSPADDR_SR);
+      data_out_cmdreg  <= s_dsp_cmdregs(conv_integer(addr_cmdreg));
       s_op_done_sync   <= op_done;
       s_op_done_resync <= s_op_done_sync;
     end if;
   end process p_cmdreg;
+  -------------------------------------------------------------------------------
+  -- Register bank accessibel from controler
+  -------------------------------------------------------------------------------
   p_cmdreg_buf : process (clk_cpu, reset)
   begin  -- process p_cmdreg_buf
     if reset = '0' then
-      --for i in 0 to (2**cmdreg_buf_addr_width - 1) loop
-      for i in 0 to 15 loop
-        s_dsp_cmdregs_buf(i) <= (others => '0');
-      end loop;
+      s_dsp_cmdregs_buf <= dsp_cmdregs_init;
     elsif rising_edge(clk_cpu) then     -- rising clock edge
       if(wr_en_cmdreg = '1') then
-        s_dsp_cmdregs_buf(to_integer(unsigned(addr_cmdreg))) <= data_in_cmdreg;
-      else
-        if((s_refresh_cmdregs(3) and s_refresh_cmdregs(0)) = '1') then
-          s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN) <= '0';
-        end if;
+        s_dsp_cmdregs_buf(conv_integer(addr_cmdreg)) <= data_in_cmdreg;
+      elsif((s_refresh_cmdregs(3) and s_refresh_cmdregs(0)) = '1') then
+        s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN) <= '0';
       end if;
       -- Pipeline to generate a delay before refresh cmdregs
       s_refresh_cmdregs(0) <= s_refresh_cmdregs_in;
