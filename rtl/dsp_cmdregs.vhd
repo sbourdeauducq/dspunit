@@ -32,7 +32,6 @@ entity dsp_cmdregs is
     clk             : in  std_logic;
     clk_cpu         : in  std_logic;
     reset           : in  std_logic;
-    -- memory 0
     op_done         : in  std_logic;
     addr_cmdreg     : in  std_logic_vector((cmdreg_addr_width - 1) downto 0);
     data_in_cmdreg  : in  std_logic_vector((cmdreg_data_width - 1) downto 0);
@@ -46,6 +45,7 @@ entity dsp_cmdregs is
     length2         : out std_logic_vector((cmdreg_data_width - 1) downto 0);
     opflag_select   : out std_logic_vector((opflag_width - 1) downto 0);
     opcode_select   : out std_logic_vector((opcode_width - 1) downto 0);
+    irq             : out std_logic;
     debug           : out std_logic_vector(15 downto 0)
     );
 end dsp_cmdregs;
@@ -97,6 +97,13 @@ architecture archi_dsp_cmdregs of dsp_cmdregs is
   signal s_run_flag            : std_logic;
   signal s_pipe_loaded         : std_logic;
   signal s_op_run              : std_logic;
+  signal s_op_done_irq         : std_logic;
+  signal s_empty_irq           : std_logic;
+  signal s_current_sr          : std_logic_vector((cmdreg_width - 1) downto 0);
+  signal s_empty_reg           : std_logic;
+  signal s_op_done_reg         : std_logic;
+  signal s_empty_ie            : std_logic;
+  signal s_op_done_ie          : std_logic;
 begin  -- archs_dsp_cmdregs
   -----------------------------------------------------------------------------
   --
@@ -116,7 +123,7 @@ begin  -- archs_dsp_cmdregs
 
   --=---------------------------------------------------------------------------
   -------------------------------------------------------------------------------
-  -- Register bank accessibel from controler
+  -- Register bank accessible from controler
   -------------------------------------------------------------------------------
   p_cmdreg_buf : process (clk_cpu, reset)
   begin  -- process p_cmdreg_buf
@@ -134,11 +141,31 @@ begin  -- archs_dsp_cmdregs
   -------------------------------------------------------------------------------
   -- Bits of status register (readable from cpu)
   -------------------------------------------------------------------------------
-  s_status_reg(DSP_SRBIT_LOADED)                         <= not s_full;
-  s_status_reg(DSP_SRBIT_OPDONE)                         <= s_op_done_resync;
-  s_status_reg(DSP_SRBIT_RUN)                            <= s_run_flag and (not s_load_pipe);
+  s_status_reg(DSP_SRBIT_LOADED)   <= not s_full;
+  s_status_reg(DSP_SRBIT_DONE)   <= s_op_done_resync;
+  s_status_reg(DSP_SRBIT_RUN)      <= s_run_flag and (not s_load_pipe);
+  s_run_flag                       <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);
+  s_status_reg(DSP_SRBIT_DONE_IE)  <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_DONE_IE);
+  s_status_reg(DSP_SRBIT_EMPTY_IE) <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_EMPTY_IE);
+  s_status_reg(DSP_SRBIT_DONE_IF)  <= s_op_done_irq;
+  s_status_reg(DSP_SRBIT_EMPTY_IF) <= s_empty_irq;
+
   s_status_reg(cmdreg_width - 1 downto DSP_SRBIT_UNUSED) <= (others => '0');
-  s_run_flag                                             <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);
+
+  s_op_done_irq <= '1' when op_done = '1' and s_op_done_reg = '0' else s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_DONE_IF);
+  s_empty_irq   <= '1' when s_empty = '1' and s_empty_reg = '0'     else s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_EMPTY_IF);
+
+  s_empty_ie   <= s_status_reg(DSP_SRBIT_EMPTY_IE);
+  s_op_done_ie <= s_current_sr(DSP_SRBIT_DONE_IE);
+  irq          <= (s_empty and s_empty_ie) or (op_done and s_op_done_ie);
+
+  p_irq : process (clk_cpu)
+  begin  -- process p_irq
+    if rising_edge(clk_cpu) then        -- rising clock edge
+      s_op_done_reg <= op_done;
+      s_empty_reg   <= s_empty;
+    end if;
+  end process p_irq;
   -------------------------------------------------------------------------------
   -- Control injection of datas in pipe
   -------------------------------------------------------------------------------
@@ -164,7 +191,7 @@ begin  -- archs_dsp_cmdregs
   begin  -- process p_pipe_out
     if reset = '0' then
       s_op_run <= '0';
-    elsif rising_edge(clk) then         -- rising clock edge
+    elsif rising_edge(clk_cpu) then     -- rising clock edge
       if s_op_done_resync = '1' then
         s_op_run <= '0';
         s_read   <= '0';
@@ -211,6 +238,7 @@ begin  -- archs_dsp_cmdregs
   -- @concurrent signal assignments
   --
   -----------------------------------------------------------------------------
-  debug <= s_dsp_cmdregs(DSPADDR_SR);
+  debug        <= s_dsp_cmdregs(DSPADDR_SR);
+  s_current_sr <= s_dsp_cmdregs(DSPADDR_SR);
 end archi_dsp_cmdregs;
 -------------------------------------------------------------------------------

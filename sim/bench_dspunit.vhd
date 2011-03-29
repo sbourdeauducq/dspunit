@@ -63,6 +63,7 @@ architecture archi_bench_dspunit of bench_dspunit is
       wr_en_cmdreg    : in  std_logic;
       data_out_cmdreg : out std_logic_vector((cmdreg_data_width - 1) downto 0);
       debug           : out std_logic_vector(15 downto 0);
+      irq             : out std_logic;
       op_done         : out std_logic
       );
   end component;
@@ -140,6 +141,7 @@ architecture archi_bench_dspunit of bench_dspunit is
   signal s_data_out_cmdreg : std_logic_vector((cmdreg_data_width - 1) downto 0);
   signal s_op_done         : std_logic;
   signal s_debug_dsp       : std_logic_vector(15 downto 0);
+  signal s_irq             : std_logic;
 begin  -- archs_bench_dspunit
   -----------------------------------------------------------------------------
   --
@@ -172,6 +174,7 @@ begin  -- archs_bench_dspunit
       wr_en_cmdreg    => s_wr_en_cmdreg,
       data_out_cmdreg => s_data_out_cmdreg,
       debug           => s_debug_dsp,
+      irq             => s_irq,
       op_done         => s_op_done);
 
   gen_memory_1 : gen_memoryf
@@ -254,7 +257,7 @@ begin  -- archs_bench_dspunit
                       -- x"0072" after 241 ns, x"0080" after 251 ns, x"0026" after 261 ns, x"0002" after 271 ns,           -- sigshift bitrev
                       x"0080" after 321 ns,
                       x"0040" after 341 ns, x"000F" after 351 ns, x"000C" after 361 ns, x"0002" after 371 ns,  -- fft
-                      x"0040" after 461 ns, x"0040" after 471 ns, x"000D" after 481 ns, x"0002" after 491 ns,  -- dotcmul
+                      x"0040" after 461 ns, x"0040" after 471 ns, x"000D" after 481 ns, x"000A" after 491 ns,  -- dotcmul
                       x"0040" after 541 ns, x"000A" after 551 ns, x"003C" after 561 ns, x"0002" after 571 ns,  -- ifft bitrev
                       x"0040" after 661 ns, x"0040" after 671 ns, x"002D" after 681 ns, x"0002" after 691 ns;  -- dotcmul bitrev
   s_wr_en_cmdreg <= '0', '1' after 141 ns, '0' after 181 ns,

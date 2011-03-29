@@ -58,6 +58,7 @@ entity dspunit is
     wr_en_cmdreg    : in  std_logic;
     data_out_cmdreg : out std_logic_vector((cmdreg_data_width - 1) downto 0);
     debug           : out std_logic_vector(15 downto 0);
+    irq             : out std_logic;
     op_done         : out std_logic
     );
 end dspunit;
@@ -84,10 +85,10 @@ architecture archi_dspunit of dspunit is
       b2          : in  std_logic_vector((sig_width - 1) downto 0);
       clk         : in  std_logic;
       clr_acc     : in  std_logic;
-      acc_mode1   : in  std_logic_vector((acc_mode_width - 1) downto 0); -- t_acc_mode;
-      acc_mode2   : in  std_logic_vector((acc_mode_width - 1) downto 0); -- t_acc_mode;
-      alu_select  : in  std_logic_vector((alu_select_width - 1) downto 0); -- t_alu_select;
-      cmp_mode    : in  std_logic_vector((cmp_mode_width - 1) downto 0); -- t_cmp_mode;
+      acc_mode1   : in  std_logic_vector((acc_mode_width - 1) downto 0);  -- t_acc_mode;
+      acc_mode2   : in  std_logic_vector((acc_mode_width - 1) downto 0);  -- t_acc_mode;
+      alu_select  : in  std_logic_vector((alu_select_width - 1) downto 0);  -- t_alu_select;
+      cmp_mode    : in  std_logic_vector((cmp_mode_width - 1) downto 0);  -- t_cmp_mode;
       cmp_pol     : in  std_logic;
       cmp_store   : in  std_logic;
       chain_acc   : in  std_logic;
@@ -118,6 +119,7 @@ architecture archi_dspunit of dspunit is
       length2         : out std_logic_vector((cmdreg_data_width - 1) downto 0);
       opflag_select   : out std_logic_vector((opflag_width - 1) downto 0);
       opcode_select   : out std_logic_vector((opcode_width - 1) downto 0);
+      irq             : out std_logic;
       debug           : out std_logic_vector(15 downto 0)
       );
   end component;
@@ -132,14 +134,14 @@ architecture archi_dspunit of dspunit is
   end component;
   component cpmem
     port (
-      clk        : in  std_logic;
-      op_en      : in  std_logic;
-      data_in_m0 : in  std_logic_vector((sig_width - 1) downto 0);
-    data_in_m1 : in  std_logic_vector((sig_width - 1) downto 0);
-    data_in_m2 : in  std_logic_vector((sig_width - 1) downto 0);
-    length_reg : in  std_logic_vector((cmdreg_data_width -1) downto 0);
-    opflag_select   : in  std_logic_vector((opflag_width - 1) downto 0);
-      dsp_bus    : out t_dsp_bus
+      clk           : in  std_logic;
+      op_en         : in  std_logic;
+      data_in_m0    : in  std_logic_vector((sig_width - 1) downto 0);
+      data_in_m1    : in  std_logic_vector((sig_width - 1) downto 0);
+      data_in_m2    : in  std_logic_vector((sig_width - 1) downto 0);
+      length_reg    : in  std_logic_vector((cmdreg_data_width -1) downto 0);
+      opflag_select : in  std_logic_vector((opflag_width - 1) downto 0);
+      dsp_bus       : out t_dsp_bus
       );
   end component;
   component fft
@@ -181,20 +183,20 @@ architecture archi_dspunit of dspunit is
   end component;
   component dotopnorm
     port (
-      clk        : in  std_logic;
-      op_en      : in  std_logic;
-      data_in_m0 : in  std_logic_vector((sig_width - 1) downto 0);
-      data_in_m1 : in  std_logic_vector((sig_width - 1) downto 0);
-      data_in_m2 : in  std_logic_vector((sig_width - 1) downto 0);
-      length_reg : in  std_logic_vector((cmdreg_data_width -1) downto 0);
+      clk           : in  std_logic;
+      op_en         : in  std_logic;
+      data_in_m0    : in  std_logic_vector((sig_width - 1) downto 0);
+      data_in_m1    : in  std_logic_vector((sig_width - 1) downto 0);
+      data_in_m2    : in  std_logic_vector((sig_width - 1) downto 0);
+      length_reg    : in  std_logic_vector((cmdreg_data_width -1) downto 0);
       offset_params : in  std_logic_vector((cmdreg_data_width -1) downto 0);
       offset_result : in  std_logic_vector((cmdreg_data_width -1) downto 0);
-      opflag_select   : in  std_logic_vector((opflag_width - 1) downto 0);
-      result1        : in  std_logic_vector((sig_width - 1) downto 0);
-      result2        : in  std_logic_vector((2*sig_width - 1) downto 0);
-      cmp_greater    : in  std_logic;
-      dsp_bus    : out t_dsp_bus
-	);
+      opflag_select : in  std_logic_vector((opflag_width - 1) downto 0);
+      result1       : in  std_logic_vector((sig_width - 1) downto 0);
+      result2       : in  std_logic_vector((2*sig_width - 1) downto 0);
+      cmp_greater   : in  std_logic;
+      dsp_bus       : out t_dsp_bus
+      );
   end component;
   component dspdiv
     generic (
@@ -310,6 +312,7 @@ begin  -- archs_dspunit
       length2         => s_length2,
       opflag_select   => s_opflag_select,
       opcode_select   => s_opcode_select,
+      irq             => irq,
       debug           => open);
 
   dsplut_1 : dsplut
@@ -329,14 +332,14 @@ begin  -- archs_dspunit
 
   cpmem_1 : cpmem
     port map (
-      clk        => clk,
-      op_en      => s_op_cpmem_en,
-      data_in_m0 => data_in_m0,
-      data_in_m1 => data_in_m1,
-      data_in_m2 => data_in_m2,
-      length_reg => s_length0,          --s_dsp_cmdregs(DSPADDR_LENGTH0),
-      opflag_select   => s_opflag_select,
-      dsp_bus    => s_dsp_bus_cpmem);
+      clk           => clk,
+      op_en         => s_op_cpmem_en,
+      data_in_m0    => data_in_m0,
+      data_in_m1    => data_in_m1,
+      data_in_m2    => data_in_m2,
+      length_reg    => s_length0,       --s_dsp_cmdregs(DSPADDR_LENGTH0),
+      opflag_select => s_opflag_select,
+      dsp_bus       => s_dsp_bus_cpmem);
 
   fft_1 : fft
     port map (
@@ -367,19 +370,19 @@ begin  -- archs_dspunit
 
   dotopnorm_1 : dotopnorm
     port map (
-	  clk 	=> clk,
-	  op_en 	=> s_op_dotopnorm_en,
-	  data_in_m0 	=> data_in_m0,
-	  data_in_m1 	=> data_in_m1,
-	  data_in_m2 	=> data_in_m2,
-	  length_reg 	=> s_length0,
-	  offset_params 	=> s_length1,
-	  offset_result 	=> s_length2,
-	  opflag_select 	=> s_opflag_select,
-	  result1 	=> s_alu_result_acc1((2*sig_width - 2) downto (sig_width - 1)),
-	  result2 	=> s_alu_result_acc2((acc_width - 1) downto (acc_width - 2*sig_width)),
-	  cmp_greater 	=> s_cmp_greater,
-	  dsp_bus 	=> s_dsp_bus_dotopnorm);
+      clk           => clk,
+      op_en         => s_op_dotopnorm_en,
+      data_in_m0    => data_in_m0,
+      data_in_m1    => data_in_m1,
+      data_in_m2    => data_in_m2,
+      length_reg    => s_length0,
+      offset_params => s_length1,
+      offset_result => s_length2,
+      opflag_select => s_opflag_select,
+      result1       => s_alu_result_acc1((2*sig_width - 2) downto (sig_width - 1)),
+      result2       => s_alu_result_acc2((acc_width - 1) downto (acc_width - 2*sig_width)),
+      cmp_greater   => s_cmp_greater,
+      dsp_bus       => s_dsp_bus_dotopnorm);
 
   dspdiv_1 : dspdiv
     generic map (

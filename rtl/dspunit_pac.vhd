@@ -43,8 +43,9 @@ package dspunit_pac is
   constant lut_out_width     : positive := sig_width;
   constant angle_width       : positive := 13;
 
-  constant div_pipe_length   : positive := sig_width + 1;
   constant c_dsp_pipe_length : positive := 4;
+
+  constant div_pipe_length   : positive := sig_width + 1;
 
   function sig_cst_init(realval : real) return std_logic_vector;
   function module(a             : signed; b : signed) return integer;
@@ -76,10 +77,10 @@ package dspunit_pac is
     mul_in_b1      : std_logic_vector((sig_width - 1) downto 0);
     mul_in_a2      : std_logic_vector((sig_width - 1) downto 0);
     mul_in_b2      : std_logic_vector((sig_width - 1) downto 0);
-    acc_mode1      : std_logic_vector((acc_mode_width - 1) downto 0); -- t_acc_mode;
-    acc_mode2      : std_logic_vector((acc_mode_width - 1) downto 0); -- t_acc_mode;
-    alu_select     : std_logic_vector((alu_select_width - 1) downto 0); -- t_alu_select;
-    cmp_mode       : std_logic_vector((cmp_mode_width - 1) downto 0); -- t_cmp_mode;
+    acc_mode1      : std_logic_vector((acc_mode_width - 1) downto 0);  -- t_acc_mode;
+    acc_mode2      : std_logic_vector((acc_mode_width - 1) downto 0);  -- t_acc_mode;
+    alu_select     : std_logic_vector((alu_select_width - 1) downto 0);  -- t_alu_select;
+    cmp_mode       : std_logic_vector((cmp_mode_width - 1) downto 0);  -- t_cmp_mode;
     cmp_pol        : std_logic;
     cmp_store      : std_logic;
     -- divider
@@ -132,7 +133,7 @@ package dspunit_pac is
     );
 
   function "or" (a, b : t_dsp_bus) return t_dsp_bus;
-  function "and" (a : std_logic_vector; b : std_logic) return std_logic_vector;
+  function "and" (a   : std_logic_vector; b : std_logic) return std_logic_vector;
 
   function dsp_cmdregs_init return t_dsp_cmdregs;
 -------------------------------------------------------------------------------
@@ -155,37 +156,41 @@ package dspunit_pac is
   constant DSPADDR_SR         : positive := 8;
 
 -- Bits of status register
-  constant DSP_SRBIT_OPDONE : natural := 0;
-  constant DSP_SRBIT_RUN    : natural := 1;
-  constant DSP_SRBIT_LOADED : natural := 2;
-  constant DSP_SRBIT_UNUSED : natural := 3;
+  constant DSP_SRBIT_DONE     : natural := 0;
+  constant DSP_SRBIT_RUN      : natural := 1;
+  constant DSP_SRBIT_LOADED   : natural := 2;
+  constant DSP_SRBIT_DONE_IE  : natural := 3;
+  constant DSP_SRBIT_EMPTY_IE : natural := 4;
+  constant DSP_SRBIT_DONE_IF  : natural := 5;
+  constant DSP_SRBIT_EMPTY_IF : natural := 6;
+  constant DSP_SRBIT_UNUSED   : natural := 7;
 
 -- opcodes of availables processings
   constant opcode_width     : positive                                      := 4;
   constant opcode_cpflip    : std_logic_vector((opcode_width - 1) downto 0) := "0010";
   constant opcode_cpmem     : std_logic_vector((opcode_width - 1) downto 0) := "0100";
   constant opcode_setmem    : std_logic_vector((opcode_width - 1) downto 0) := "0101";
-  constant opcode_dotopnorm  : std_logic_vector((opcode_width - 1) downto 0) := "0111";
+  constant opcode_dotopnorm : std_logic_vector((opcode_width - 1) downto 0) := "0111";
   constant opcode_dotdiv  : std_logic_vector((opcode_width - 1) downto 0) := "1000";
   constant opcode_fft       : std_logic_vector((opcode_width - 1) downto 0) := "1100";
   constant opcode_dotcmul   : std_logic_vector((opcode_width - 1) downto 0) := "1101";
 
 -- opflags (options related to each operation)
-  constant opflag_width       : positive                                      := 8;
-  constant opflag_ifft        : std_logic_vector((opflag_width - 1) downto 0) := "00000001";
-  constant opflagbit_ifft     : natural                                       := 0;
-  constant opflag_bitrev      : std_logic_vector((opflag_width - 1) downto 0) := "00000010";
-  constant opflagbit_bitrev   : natural                                       := 1;
-  constant opflag_mainmem     : std_logic_vector((opflag_width - 1) downto 0) := "00000010";
-  constant opflagbit_mainmem  : natural                                       := 1;
-  constant opflag_savestep    : std_logic_vector((opflag_width - 1) downto 0) := "00001000";
-  constant opflagbit_savestep : natural                                       := 3;
-  constant opflag_muladd    : std_logic_vector((opflag_width - 1) downto 0) := "00000001";
-  constant opflagbit_muladd : natural                                       := 0;
-  constant opflag_l1norm    : std_logic_vector((opflag_width - 1) downto 0) := "00000010";
-  constant opflagbit_l1norm : natural                                       := 1;
-  constant opflag_tocomplex    : std_logic_vector((opflag_width - 1) downto 0) := "00000001";
-  constant opflagbit_tocomplex : natural                                       := 0;
+  constant opflag_width          : positive                                      := 8;
+  constant opflag_ifft           : std_logic_vector((opflag_width - 1) downto 0) := "00000001";
+  constant opflagbit_ifft        : natural                                       := 0;
+  constant opflag_bitrev         : std_logic_vector((opflag_width - 1) downto 0) := "00000010";
+  constant opflagbit_bitrev      : natural                                       := 1;
+  constant opflag_mainmem        : std_logic_vector((opflag_width - 1) downto 0) := "00000010";
+  constant opflagbit_mainmem     : natural                                       := 1;
+  constant opflag_savestep       : std_logic_vector((opflag_width - 1) downto 0) := "00001000";
+  constant opflagbit_savestep    : natural                                       := 3;
+  constant opflag_muladd         : std_logic_vector((opflag_width - 1) downto 0) := "00000001";
+  constant opflagbit_muladd      : natural                                       := 0;
+  constant opflag_l1norm         : std_logic_vector((opflag_width - 1) downto 0) := "00000010";
+  constant opflagbit_l1norm      : natural                                       := 1;
+  constant opflag_tocomplex      : std_logic_vector((opflag_width - 1) downto 0) := "00000001";
+  constant opflagbit_tocomplex   : natural                                       := 0;
   constant opflag_fromcomplex    : std_logic_vector((opflag_width - 1) downto 0) := "00000010";
   constant opflagbit_fromcomplex : natural                                       := 1;
 
@@ -287,8 +292,8 @@ package body dspunit_pac is
   end "or";
 
   function "and" (a : std_logic_vector; b : std_logic) return std_logic_vector is
-    constant L : natural := a'length;
-    alias aa : std_logic_vector((L - 1) downto 0) is A;
+    constant L  : natural := a'length;
+    alias aa    : std_logic_vector((L - 1) downto 0) is A;
     variable yy : std_logic_vector((L - 1) downto 0);
   begin
     for i in L-1 downto 0 loop
