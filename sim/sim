@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ ! -d work ]; then
+    mkdir work
+fi
+
 #Go to proper working directory
 ###############################
 shdir=`echo $0|sed -e 's/\/[^\/]*$//'`
@@ -33,21 +37,12 @@ egrep '^file' work/work-obj93.cf|\
   sed -e 's/^file "[^"]*"/file ""/'|\
   awk '{ a[NR]=$3 } END { for(i=NR; i--; i) print a[i+1] }'|\
   sed 's/\"//g' > .vhdlist.tmp
-diff vhdlist .vhdlist.tmp > .difflist.tmp
-if [ ! $? = 0 ]; then
-  echo 'updating vhdlist...'
-  egrep '^<' .difflist.tmp|sed 's/^<\s*//' > .vhdlist.tmp
-  ghdl -i --workdir=work $(<.vhdlist.tmp)
-  if [ $? = 0 ]; then
-    egrep '^file' work/work-obj93.cf|\
-      sed -e 's/^file "[^"]*"/file ""/'|\
-      awk '{ a[NR]=$3 } END { for(i=NR; i--; i) print a[i+1] }'|\
-      sed 's/\"//g' > vhdlist
-  else
-    echo 'Error while analysing project file!'
-    exit
-  fi
-fi
+for i in `cat vhdlist`; do
+    grep $i .vhdlist.tmp
+    if [ ! $? = 0 ]; then
+        ghdl -i --workdir=work $i
+    fi
+done >> /dev/null
 
 rm .*.tmp
 #######################################
@@ -79,7 +74,7 @@ case $1 in
     #run ) ghdl -r bench_$2 --stop-time=200000ns --wave=wave.ghw 2> run.log;;
     view ) 
       check_prof view
-      if [ -f "$SIMSAVFILE" ]; then
+      if [ -f $SIMSAVFILE ]; then
         echo " view result of $PROFNAME with file $SIMSAVFILE"
         gtkwave --save=$SIMSAVFILE waves_$PROFNAME.vcd &
       else
@@ -93,7 +88,12 @@ case $1 in
         echo "error : file $2 does not exist!"
         exit
       fi
-      echo "$2" >> vhdlist;;
+      grep "$2" vhdlist
+      if [ ! $? = 0 ]; then
+          echo "$2" >> vhdlist
+          ghdl -i --workdir=work "$2"
+      fi
+      ;;
     ana ) ghdl -a --workdir=work "$2";;
     msg ) 
       check_prof msg
