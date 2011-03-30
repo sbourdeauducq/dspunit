@@ -32,7 +32,7 @@ use work.bit_manipulation.all;
 package dspunit_pac is
 
   constant sig_width         : positive := 16;
-  constant cmdreg_addr_width : natural  := 6;
+  constant cmdreg_addr_width : natural  := 4;
   constant cmdreg_data_width : positive := 16;
   constant cmdreg_width      : positive := 16;
   constant cmdregs_length    : positive := 16;

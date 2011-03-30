@@ -141,7 +141,7 @@ begin  -- archs_dsp_cmdregs
   -------------------------------------------------------------------------------
   -- Bits of status register (readable from cpu)
   -------------------------------------------------------------------------------
-  s_status_reg(DSP_SRBIT_LOADED)   <= not s_full;
+  s_status_reg(DSP_SRBIT_LOADED)   <= s_full;
   s_status_reg(DSP_SRBIT_DONE)   <= s_op_done_resync;
   s_status_reg(DSP_SRBIT_RUN)      <= s_run_flag and (not s_load_pipe);
   s_run_flag                       <= s_dsp_cmdregs_buf(DSPADDR_SR)(DSP_SRBIT_RUN);

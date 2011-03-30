@@ -243,14 +243,14 @@ begin  -- archs_bench_dspunit
   -- @concurrent signal assignments
   --
   -----------------------------------------------------------------------------
-  s_addr_cmdreg <= "000000", "000100" after 141 ns, "000010" after 151 ns, "000111" after 161 ns, "001000" after 171 ns,
---                         "000010" after 8751 ns, "000111" after 8761 ns, "001000" after 8771 ns,
-                   "000100" after 241 ns, "000010" after 251 ns, "000111" after 261 ns, "001000" after 271 ns,
-                   "000001" after 321 ns,
-                   "000010" after 341 ns, "000100" after 351 ns, "000111" after 361 ns, "001000" after 371 ns,
-                   "000100" after 461 ns, "000010" after 471 ns, "000111" after 481 ns, "001000" after 491 ns,
-                   "000010" after 541 ns, "000100" after 551 ns, "000111" after 561 ns, "001000" after 571 ns,
-                   "000100" after 661 ns, "000010" after 671 ns, "000111" after 681 ns, "001000" after 691 ns;
+  s_addr_cmdreg <= "0000", "0100" after 141 ns, "0010" after 151 ns, "0111" after 161 ns, "1000" after 171 ns,
+--                         "0010" after 8751 ns, "0111" after 8761 ns, "1000" after 8771 ns,
+                   "0100" after 241 ns, "0010" after 251 ns, "0111" after 261 ns, "1000" after 271 ns,
+                   "0001" after 321 ns,
+                   "0010" after 341 ns, "0100" after 351 ns, "0111" after 361 ns, "1000" after 371 ns,
+                   "0100" after 461 ns, "0010" after 471 ns, "0111" after 481 ns, "1000" after 491 ns,
+                   "0010" after 541 ns, "0100" after 551 ns, "0111" after 561 ns, "1000" after 571 ns,
+                   "0100" after 661 ns, "0010" after 671 ns, "0111" after 681 ns, "1000" after 691 ns;
   s_data_in_cmdreg <= x"0000", x"003F" after 141 ns, x"0040" after 151 ns, x"003C" after 161 ns, x"0002" after 171 ns,  -- ifft bitrev
 --                         x"003F" after 8751 ns, x"002D" after 8761 ns, x"0002" after 8771 ns,     -- dotcmul bitrev
                       -- sigshift is not available any more
